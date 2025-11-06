@@ -41,7 +41,6 @@ CareFlow HMS is built using a robust and scalable modern web application stack:
     *   Git (Version Control)
     *   npm / Yarn (Package Management)
     *   JWT (JSON Web Tokens) for authentication
-    *   Docker (for containerization and deployment - assumed)
 
 ## Getting Started
 
