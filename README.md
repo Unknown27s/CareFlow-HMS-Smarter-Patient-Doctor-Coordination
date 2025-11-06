@@ -130,5 +130,4 @@ Distributed under the MIT License. See `LICENSE` for more information.
 
 ## Contact
 
-Your Name/Organization - [@YourTwitterHandle](https://twitter.com/YourTwitterHandle) (Optional)
 Project Link: [https://github.com/Unknown27s/CareFlow-HMS-Smarter-Patient-Doctor-Coordination](https://github.com/Unknown27s/CareFlow-HMS-Smarter-Patient-Doctor-Coordination.git)
