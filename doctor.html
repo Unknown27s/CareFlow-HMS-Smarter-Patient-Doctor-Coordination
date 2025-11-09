@@ -4,175 +4,74 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Doctor Appointment Management System</title>
+    <title>Doctor Dashboard - மருத்துவர் பலகை</title>
     <style>
-        /* ============================================
-           MEDIBOT CHATBOT WIDGET - PURE JS VERSION
-           ============================================ */
-
-        /* Base Styles & Font */
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            background-color: #f9fafb;
-            /* A light grey background for the demo page */
-        }
-
-        .medibot-widget * {
-            box-sizing: border-box;
+        * {
             margin: 0;
             padding: 0;
+            box-sizing: border-box;
         }
 
-        /* Floating Action Button (FAB) */
-        .medibot-fab {
-            position: fixed;
-            bottom: 24px;
-            right: 24px;
-            width: 56px;
-            height: 56px;
-            background: linear-gradient(135deg, #4f46e5, #7c3aed);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-            z-index: 10000;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            border: none;
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #e3f2fd 0%, #f1f8e9 100%);
+            color: #333;
+            line-height: 1.6;
         }
 
-        .medibot-fab:hover {
-            transform: scale(1.1);
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
-        }
-
-        .medibot-fab svg {
-            width: 28px;
-            height: 28px;
-            fill: white;
-            transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
-            position: absolute;
-        }
-
-        .medibot-fab .medibot-fab-icon-close {
-            opacity: 0;
-            transform: rotate(-90deg);
-        }
-
-        .medibot-fab.active .medibot-fab-icon-open {
-            opacity: 0;
-            transform: rotate(90deg);
-        }
-
-        .medibot-fab.active .medibot-fab-icon-close {
-            opacity: 1;
-            transform: rotate(0deg);
-        }
-
-        /* Chat Window */
-        .medibot-window {
-            position: fixed;
-            bottom: 90px;
-            right: 24px;
-            width: 400px;
-            max-width: calc(100vw - 32px);
-            height: 600px;
-            max-height: calc(100vh - 120px);
-            background: white;
-            border-radius: 16px;
-            box-shadow: 0 12px 48px rgba(0, 0, 0, 0.25);
-            display: flex;
-            flex-direction: column;
-            z-index: 9999;
-            opacity: 0;
-            transform: scale(0.9) translateY(20px);
-            pointer-events: none;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            overflow: hidden;
-        }
-
-        .medibot-window.active {
-            opacity: 1;
-            transform: scale(1) translateY(0);
-            pointer-events: all;
-        }
-
-        /* Header */
-        .medibot-header {
-            background: linear-gradient(135deg, #4f46e5, #7c3aed);
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
             padding: 20px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            flex-shrink: 0;
         }
 
-        .medibot-header-avatar {
-            width: 40px;
-            height: 40px;
-            background: white;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 20px;
+        /* Language Toggle Button */
+        .language-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
         }
 
-        .medibot-header-info h3 {
+        .lang-btn {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ff8e53 100%);
             color: white;
-            font-size: 16px;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 25px;
+            font-size: 0.95em;
             font-weight: 600;
-        }
-
-        .medibot-header-status {
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+            transition: all 0.3s ease;
             display: flex;
             align-items: center;
-            gap: 6px;
-            font-size: 12px;
-            color: #ddd6fe;
+            gap: 8px;
         }
 
-        .medibot-status-dot {
-            width: 8px;
-            height: 8px;
-            background: #4ade80;
-            border-radius: 50%;
-            animation: medibot-pulse 2s infinite;
+        .lang-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 107, 107, 0.4);
         }
 
-        @keyframes medibot-pulse {
-
-            0%,
-            100% {
-                opacity: 1;
-            }
-
-            50% {
-                opacity: 0.6;
-            }
+        .lang-icon {
+            font-size: 1.2em;
         }
 
-        /* Messages Area */
-        .medibot-messages {
-            flex: 1;
-            padding: 20px;
-            overflow-y: auto;
-            background: #f3f4f6;
+        /* Header Section */
+        .header-section {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+            animation: fadeIn 0.6s ease-in;
         }
 
-        .medibot-message {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 16px;
-            align-items: flex-end;
-            animation: medibot-fadeIn 0.4s ease-out;
-        }
-
-        @keyframes medibot-fadeIn {
+        @keyframes fadeIn {
             from {
                 opacity: 0;
-                transform: translateY(10px);
+                transform: translateY(20px);
             }
 
             to {
@@ -181,1294 +80,807 @@
             }
         }
 
-        .medibot-message.user {
-            flex-direction: row-reverse;
-        }
-
-        .medibot-message-avatar {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
+        .header-content {
             display: flex;
+            justify-content: space-between;
             align-items: center;
-            justify-content: center;
-            font-size: 16px;
-            flex-shrink: 0;
+            flex-wrap: wrap;
+            gap: 20px;
         }
 
-        .medibot-message.bot .medibot-message-avatar {
-            background: linear-gradient(135deg, #4f46e5, #7c3aed);
-            color: white;
-        }
-
-        .medibot-message.user .medibot-message-avatar {
-            background: #e5e7eb;
-            color: #4b5563;
-        }
-
-        .medibot-message-bubble {
-            max-width: 75%;
-            padding: 12px 16px;
-            border-radius: 18px;
-            font-size: 14px;
-            line-height: 1.5;
-            word-wrap: break-word;
-        }
-
-        .medibot-message.bot .medibot-message-bubble {
-            background: white;
-            color: #374151;
-            border-bottom-left-radius: 4px;
-            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-        }
-
-        .medibot-message.user .medibot-message-bubble {
-            background: linear-gradient(135deg, #4f46e5, #7c3aed);
-            color: white;
-            border-bottom-right-radius: 4px;
-        }
-
-        /* Typing Indicator */
-        .medibot-typing-bubble {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 4px;
-            height: 100%;
-        }
-
-        .medibot-typing-dot {
-            width: 8px;
-            height: 8px;
-            background: #9ca3af;
-            border-radius: 50%;
-            animation: medibot-typing 1.4s infinite ease-in-out;
-        }
-
-        .medibot-typing-dot:nth-child(2) {
-            animation-delay: 0.2s;
-        }
-
-        .medibot-typing-dot:nth-child(3) {
-            animation-delay: 0.4s;
-        }
-
-        @keyframes medibot-typing {
-
-            0%,
-            60%,
-            100% {
-                transform: translateY(0);
-            }
-
-            30% {
-                transform: translateY(-6px);
-            }
-        }
-
-        /* Warning Banner */
-        .medibot-warning {
-            background: #fef3c7;
-            padding: 12px 16px;
-            font-size: 11px;
-            color: #92400e;
-            display: flex;
-            gap: 8px;
-            align-items: flex-start;
-            border-top: 1px solid #fde68a;
-            flex-shrink: 0;
-        }
-
-        .medibot-warning svg {
-            width: 14px;
-            height: 14px;
-            fill: #f59e0b;
-            flex-shrink: 0;
-            margin-top: 1px;
-        }
-
-        /* Input Area */
-        .medibot-input-area {
-            padding: 16px;
-            background: white;
-            border-top: 1px solid #e5e7eb;
-            display: flex;
-            gap: 8px;
-            flex-shrink: 0;
-        }
-
-        .medibot-input {
-            flex: 1;
-            padding: 10px 16px;
-            border: 1px solid #d1d5db;
-            border-radius: 20px;
-            font-size: 14px;
-            outline: none;
-            transition: border-color 0.2s, box-shadow 0.2s;
-        }
-
-        .medibot-input:focus {
-            border-color: #4f46e5;
-            box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.2);
-        }
-
-        .medibot-send-btn {
-            width: 40px;
-            height: 40px;
-            background: linear-gradient(135deg, #4f46e5, #7c3aed);
-            border: none;
-            border-radius: 50%;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: transform 0.2s, opacity 0.2s;
-            flex-shrink: 0;
-        }
-
-        .medibot-send-btn:hover:not(:disabled) {
-            transform: scale(1.05);
-        }
-
-        .medibot-send-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        .medibot-send-btn svg {
-            width: 18px;
-            height: 18px;
-            fill: white;
-        }
-
-        /* Responsive */
-        @media (max-width: 480px) {
-            .medibot-window {
-                width: 100%;
-                max-width: 100%;
-                height: 100%;
-                max-height: 100%;
-                right: 0;
-                bottom: 0;
-                border-radius: 0;
-            }
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        :root {
-            --primary: #6366f1;
-            --primary-dark: #4f46e5;
-            --secondary: #10b981;
-            --danger: #ef4444;
-            --warning: #f59e0b;
-            --bg-light: #f8fafc;
-            --text-dark: #1e293b;
-            --text-medium: #64748b;
-            --border: #e2e8f0;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: var(--text-dark);
-            line-height: 1.6;
-            min-height: 100vh;
-        }
-
-        /* Login Screen */
-        .login-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            padding: 20px;
-        }
-
-        .login-card {
-            background: white;
-            padding: 50px 40px;
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            max-width: 450px;
-            width: 100%;
-            text-align: center;
-        }
-
-        .login-card h1 {
-            color: var(--primary);
+        .doctor-info h1 {
+            color: #1976d2;
+            font-size: 2em;
             margin-bottom: 10px;
-            font-size: 2.2em;
         }
 
-        .login-card p {
-            color: var(--text-medium);
+        .doctor-info p {
+            color: #666;
+            font-size: 1.1em;
+        }
+
+        .header-stats {
+            display: flex;
+            gap: 20px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #1976d2 0%, #2196f3 100%);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 15px;
+            text-align: center;
+            min-width: 120px;
+        }
+
+        .stat-card h3 {
+            font-size: 2em;
+            margin-bottom: 5px;
+        }
+
+        .stat-card p {
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+
+        /* Department Filter */
+        .filter-section {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .filter-section label {
+            font-weight: 600;
+            color: #555;
+        }
+
+        .filter-section select {
+            padding: 10px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 200px;
+        }
+
+        .filter-section select:focus {
+            outline: none;
+            border-color: #1976d2;
+            box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.1);
+        }
+
+        /* Current Patient Section */
+        .current-patient-section {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
             margin-bottom: 30px;
         }
 
-        .form-group {
+        .current-patient-section h2 {
+            color: #1976d2;
             margin-bottom: 20px;
-            text-align: left;
+            font-size: 1.8em;
         }
 
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
+        .patient-card {
+            background: linear-gradient(135deg, #4caf50 0%, #66bb6a 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+        }
+
+        .patient-card.empty {
+            background: #f5f5f5;
+            color: #999;
+            text-align: center;
+            padding: 40px;
+        }
+
+        .patient-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .patient-detail {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .patient-detail label {
+            font-size: 0.9em;
+            opacity: 0.9;
+            margin-bottom: 5px;
+        }
+
+        .patient-detail span {
+            font-size: 1.1em;
             font-weight: 600;
-            color: var(--text-dark);
         }
 
-        .form-group input,
-        .form-group select,
-        .form-group textarea {
-            width: 100%;
-            padding: 14px;
-            border: 2px solid var(--border);
-            border-radius: 10px;
-            font-size: 1em;
-            transition: all 0.3s;
+        .patient-actions {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
         }
 
-        .form-group input:focus,
-        .form-group select:focus,
-        .form-group textarea:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
-        }
-
-        .btn {
-            padding: 14px 28px;
+        .btn-action {
+            padding: 12px 30px;
             border: none;
             border-radius: 10px;
             font-size: 1em;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            justify-content: center;
+            transition: all 0.3s ease;
+            flex: 1;
         }
 
-        .btn-primary {
-            background: var(--primary);
-            color: white;
-            width: 100%;
+        .btn-complete {
+            background: white;
+            color: #4caf50;
         }
 
-        .btn-primary:hover {
-            background: var(--primary-dark);
+        .btn-complete:hover {
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(99, 102, 241, 0.3);
+            box-shadow: 0 4px 15px rgba(255, 255, 255, 0.3);
         }
 
-        .btn-secondary {
-            background: var(--text-medium);
+        .btn-skip {
+            background: rgba(255, 255, 255, 0.2);
             color: white;
+            border: 2px solid white;
         }
 
-        .btn-success {
-            background: var(--secondary);
-            color: white;
+        .btn-skip:hover {
+            background: rgba(255, 255, 255, 0.3);
         }
 
-        .btn-danger {
-            background: var(--danger);
-            color: white;
-        }
-
-        /* Dashboard */
-        .dashboard {
-            display: none;
-            min-height: 100vh;
-            padding: 20px;
-            background: var(--bg-light);
-        }
-
-        .dashboard.active {
-            display: block;
-        }
-
-        .dashboard-header {
+        /* Queue Section */
+        .queue-section {
             background: white;
-            padding: 25px 30px;
-            border-radius: 15px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            margin-bottom: 25px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 15px;
-        }
-
-        .dashboard-header h1 {
-            color: var(--primary);
-            font-size: 2em;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .user-info {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .user-badge {
-            background: var(--primary);
-            color: white;
-            padding: 10px 20px;
-            border-radius: 25px;
-            font-weight: 600;
-        }
-
-        .header-actions {
-            display: flex;
-            gap: 15px;
-            flex-wrap: wrap;
-        }
-
-        .main-grid {
-            display: grid;
-            grid-template-columns: 350px 1fr;
-            gap: 25px;
-        }
-
-        .card {
-            background: white;
-            padding: 25px;
-            border-radius: 15px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            margin-bottom: 20px;
-        }
-
-        .card h2 {
-            color: var(--primary);
-            margin-bottom: 20px;
-            font-size: 1.5em;
-            border-bottom: 3px solid var(--primary);
-            padding-bottom: 10px;
-        }
-
-        /* Stats Card */
-        .stats-card {
-            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-            color: white;
-        }
-
-        .stats-card h2 {
-            color: white;
-            border-color: rgba(255, 255, 255, 0.3);
-        }
-
-        .stat-item {
-            display: flex;
-            justify-content: space-between;
-            padding: 12px 0;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-        }
-
-        .stat-item:last-child {
-            border-bottom: none;
-        }
-
-        .stat-value {
-            font-size: 1.5em;
-            font-weight: bold;
-        }
-
-        /* Table */
-        .table-container {
-            overflow-x: auto;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            min-width: 1600px;
-        }
-
-        th {
-            background: var(--primary);
-            color: white;
-            padding: 15px 12px;
-            text-align: left;
-            font-weight: 600;
-            position: sticky;
-            top: 0;
-            z-index: 10;
-        }
-
-        td {
-            padding: 15px 12px;
-            border-bottom: 1px solid var(--border);
-        }
-
-        tbody tr:hover {
-            background: var(--bg-light);
-        }
-
-        .status-badge {
-            padding: 6px 12px;
+            padding: 30px;
             border-radius: 20px;
-            font-size: 0.85em;
-            font-weight: 600;
-            display: inline-block;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
         }
 
-        .status-scheduled {
-            background: #dbeafe;
-            color: #1e40af;
+        .queue-section h2 {
+            color: #1976d2;
+            margin-bottom: 20px;
+            font-size: 1.8em;
         }
 
-        .status-waiting {
-            background: #fef3c7;
-            color: #92400e;
-        }
-
-        .status-checked {
-            background: #ddd6fe;
-            color: #5b21b6;
-        }
-
-        .status-completed {
-            background: #d1fae5;
-            color: #065f46;
-        }
-
-        .status-cancelled {
-            background: #fee2e2;
-            color: #991b1b;
-        }
-
-        .action-btn {
-            padding: 6px 12px;
-            font-size: 0.85em;
-            margin: 2px;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .action-btn:hover {
-            transform: scale(1.05);
-        }
-
-        /* Modal */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-            padding: 20px;
-        }
-
-        .modal.active {
+        .queue-list {
             display: flex;
+            flex-direction: column;
+            gap: 15px;
         }
 
-        .modal-content {
-            background: white;
+        .queue-item {
+            background: #f5f5f5;
+            padding: 20px;
             border-radius: 15px;
-            max-width: 700px;
-            width: 100%;
-            max-height: 90vh;
-            overflow-y: auto;
-        }
-
-        .modal-header {
-            padding: 25px;
-            border-bottom: 2px solid var(--border);
             display: flex;
             justify-content: space-between;
             align-items: center;
+            transition: all 0.3s ease;
+            animation: slideIn 0.4s ease-out;
         }
 
-        .modal-header h2 {
-            margin: 0;
-            border: none;
-            padding: 0;
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
         }
 
-        .modal-body {
-            padding: 25px;
+        .queue-item:hover {
+            background: #e8f5e9;
+            transform: translateX(5px);
         }
 
-        .close-btn {
-            background: none;
-            border: none;
-            font-size: 2em;
-            cursor: pointer;
-            color: var(--text-medium);
-            transition: color 0.2s;
-        }
-
-        .close-btn:hover {
-            color: var(--danger);
-        }
-
-        .form-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 20px;
-        }
-
-        .form-group.full-width {
-            grid-column: 1 / -1;
-        }
-
-        .form-group textarea {
-            resize: vertical;
-            min-height: 80px;
-        }
-
-        .radio-group {
+        .queue-item-info {
             display: flex;
             gap: 20px;
-            margin-top: 8px;
+            align-items: center;
+            flex: 1;
         }
 
-        .radio-group label {
+        .queue-token {
+            background: linear-gradient(135deg, #1976d2 0%, #2196f3 100%);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 10px;
+            font-weight: bold;
+            font-size: 1.2em;
+            min-width: 100px;
+            text-align: center;
+        }
+
+        .queue-patient-info {
+            flex: 1;
+        }
+
+        .queue-patient-info h4 {
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .queue-patient-info p {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .queue-time {
+            color: #999;
+            font-size: 0.9em;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+        }
+
+        .empty-state-icon {
+            font-size: 4em;
+            margin-bottom: 20px;
+        }
+
+        /* Stats Cards */
+        .stats-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-box {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
             display: flex;
             align-items: center;
-            gap: 8px;
-            font-weight: normal;
-            cursor: pointer;
+            gap: 20px;
         }
 
-        @media (max-width: 1024px) {
-            .main-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .form-grid {
-                grid-template-columns: 1fr;
-            }
+        .stat-icon {
+            font-size: 3em;
         }
 
+        .stat-content h3 {
+            font-size: 2em;
+            color: #1976d2;
+            margin-bottom: 5px;
+        }
+
+        .stat-content p {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        /* Responsive Design */
         @media (max-width: 768px) {
-            .dashboard-header {
+            .header-content {
                 flex-direction: column;
                 text-align: center;
             }
 
-            .header-actions {
-                width: 100%;
-                flex-direction: column;
-            }
-
-            .btn {
+            .header-stats {
                 width: 100%;
                 justify-content: center;
+            }
+
+            .patient-details {
+                grid-template-columns: 1fr;
+            }
+
+            .queue-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+
+            .queue-item-info {
+                flex-direction: column;
+                align-items: flex-start;
+                width: 100%;
+            }
+        }
+
+        /* Auto-refresh indicator */
+        .refresh-indicator {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: white;
+            padding: 15px 20px;
+            border-radius: 25px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            z-index: 999;
+        }
+
+        .refresh-dot {
+            width: 10px;
+            height: 10px;
+            background: #4caf50;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.3;
             }
         }
     </style>
 </head>
 
 <body>
-    <div class="medibot-widget">
-        <!-- Floating Button -->
-        <button class="medibot-fab" id="medibot-fab" aria-label="Toggle chat">
-            <svg class="medibot-fab-icon-open" viewBox="0 0 24 24">
-                <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z" />
-            </svg>
-            <svg class="medibot-fab-icon-close" viewBox="0 0 24 24">
-                <path
-                    d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
-            </svg>
+    <!-- Language Toggle Button -->
+    <div class="language-toggle">
+        <button class="lang-btn" onclick="toggleLanguage()">
+            <span class="lang-icon">🌐</span>
+            <span id="langBtnText">தமிழ்</span>
         </button>
-
-        <!-- Chat Window -->
-        <div class="medibot-window" id="medibot-window">
-            <!-- Header -->
-            <div class="medibot-header">
-                <div class="medibot-header-avatar">🩺</div>
-                <div class="medibot-header-info">
-                    <h3>MediBot Assistant</h3>
-                    <div class="medibot-header-status">
-                        <span class="medibot-status-dot"></span>
-                        <span>Online</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Messages -->
-            <div class="medibot-messages" id="medibot-messages">
-                <!-- Initial bot message is now added dynamically via JS -->
-            </div>
-
-            <!-- Warning -->
-            <div class="medibot-warning">
-                <svg viewBox="0 0 24 24">
-                    <path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z" />
-                </svg>
-                <div><strong>Disclaimer:</strong> This AI provides informational guidance only. Always consult a
-                    certified doctor for diagnosis.</div>
-            </div>
-
-            <!-- Input -->
-            <form class="medibot-input-area" id="medibot-form">
-                <input type="text" class="medibot-input" id="medibot-input" placeholder="Type your medical question..."
-                    autocomplete="off" />
-                <button type="submit" class="medibot-send-btn" id="medibot-send">
-                    <svg viewBox="0 0 24 24">
-                        <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
-                    </svg>
-                </button>
-            </form>
-        </div>
-    </div>
-    <!-- Login Screen -->
-    <div id="loginScreen" class="login-container">
-        <div class="login-card">
-            <h1>🩺 Doctor Login</h1>
-            <p>Welcome to Appointment Management System</p>
-            <form id="loginForm" onsubmit="app.login(event)">
-                <div class="form-group">
-                    <label>👨‍⚕️ Select Doctor</label>
-                    <select id="doctorSelect" required>
-                        <option value="">Choose your name</option>
-                        <option value="Dr. Patel">Dr. Patel</option>
-                        <option value="Dr. Kumar">Dr. Kumar</option>
-                        <option value="Dr. Sharma">Dr. Sharma</option>
-                        <option value="Dr. Singh">Dr. Singh</option>
-                        <option value="Dr. Reddy">Dr. Reddy</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>🔐 Doctor ID</label>
-                    <input type="text" id="doctorId" required placeholder="Enter your Doctor ID">
-                </div>
-                <button type="submit" class="btn btn-primary">Login to Dashboard</button>
-            </form>
-        </div>
     </div>
 
-    <!-- Dashboard -->
-    <div id="dashboard" class="dashboard">
-        <!-- Header -->
-        <div class="dashboard-header">
-            <div>
-                <h1>🩺 Appointment Management Dashboard</h1>
-                <p style="color: var(--text-medium); margin-top: 5px;">Manage your appointments and patient
-                    consultations</p>
-            </div>
-            <div class="user-info">
-                <div class="user-badge" id="currentDoctor"></div>
-                <button class="btn btn-danger" onclick="app.logout()">Logout</button>
-            </div>
-        </div>
-
-        <div class="header-actions" style="margin-bottom: 25px; padding: 0 5px;">
-            <button class="btn btn-primary" onclick="app.openAppointmentModal()">➕ New Appointment</button>
-            <button class="btn btn-secondary" onclick="app.exportData()">📥 Export Data</button>
-        </div>
-
-        <!-- Main Grid -->
-        <div class="main-grid">
-            <!-- Sidebar -->
-            <aside>
-                <!-- Statistics -->
-                <div class="card stats-card">
-                    <h2>📊 My Statistics</h2>
-                    <div class="stat-item">
-                        <span>Total Appointments:</span>
-                        <span class="stat-value" id="totalAppts">0</span>
+    <div class="container">
+        <!-- Header Section -->
+        <section class="header-section">
+            <div class="header-content">
+                <div class="doctor-info">
+                    <h1 id="dashboardTitle">👨‍⚕️ Doctor Dashboard</h1>
+                    <p id="welcomeText">Welcome, Dr. Smith</p>
+                </div>
+                <div class="header-stats">
+                    <div class="stat-card">
+                        <h3 id="totalToday">0</h3>
+                        <p id="totalTodayLabel">Today</p>
                     </div>
-                    <div class="stat-item">
-                        <span>Scheduled:</span>
-                        <span class="stat-value" id="scheduledAppts">0</span>
-                    </div>
-                    <div class="stat-item">
-                        <span>Waiting:</span>
-                        <span class="stat-value" id="waitingAppts">0</span>
-                    </div>
-                    <div class="stat-item">
-                        <span>Checked:</span>
-                        <span class="stat-value" id="checkedAppts">0</span>
-                    </div>
-                    <div class="stat-item">
-                        <span>Completed:</span>
-                        <span class="stat-value" id="completedAppts">0</span>
-                    </div>
-                    <div class="stat-item">
-                        <span>Cancelled:</span>
-                        <span class="stat-value" id="cancelledAppts">0</span>
+                    <div class="stat-card">
+                        <h3 id="completedToday">0</h3>
+                        <p id="completedTodayLabel">Completed</p>
                     </div>
                 </div>
-
-                <!-- Quick Actions -->
-                <div class="card">
-                    <h2>⚡ Quick Actions</h2>
-                    <button class="btn btn-success" style="width: 100%; margin-bottom: 10px;"
-                        onclick="app.filterByStatus('Waiting')">View Waiting Patients</button>
-                    <button class="btn btn-primary" style="width: 100%; margin-bottom: 10px;"
-                        onclick="app.filterByToday()">Today's Appointments</button>
-                    <button class="btn btn-secondary" style="width: 100%;" onclick="app.clearFilters()">Clear
-                        Filters</button>
-                </div>
-            </aside>
-
-            <!-- Main Content -->
-            <main>
-                <div class="card">
-                    <h2>🗂 My Appointments</h2>
-
-                    <!-- Table View -->
-                    <div id="tableView" class="view-content active">
-                        <div class="table-container">
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <th>📆 Date</th>
-                                        <th>🧾 Patient ID</th>
-                                        <th>📋 Visit Type</th>
-                                        <th>⚧ Gender</th>
-                                        <th>📞 Contact</th>
-                                        <th>🏠 Address</th>
-                                        <th>💻 Mode</th>
-                                        <th>💬 Chief Complaint</th>
-                                        <th>📅 Status</th>
-                                        <th>🧾 Diagnosis</th>
-                                        <th>💊 Medicines</th>
-                                        <th>📆 Next Visit</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="appointmentsTable"></tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </main>
-        </div>
-    </div>
-
-    <!-- Appointment Modal -->
-    <div id="appointmentModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>➕ New Appointment</h2>
-                <button class="close-btn" onclick="app.closeModal()">&times;</button>
             </div>
-            <div class="modal-body">
-                <form id="appointmentForm" onsubmit="app.saveAppointment(event)">
-                    <div class="form-grid">
-                        <div class="form-group">
-                            <label>📆 Date *</label>
-                            <input type="date" id="date" required>
-                        </div>
-                        <div class="form-group">
-                            <label>🧾 Patient ID *</label>
-                            <input type="text" id="patientId" required placeholder="P-1024">
-                        </div>
-                        <div class="form-group">
-                            <label>📋 Visit Type *</label>
-                            <div class="radio-group">
-                                <label><input type="radio" name="visitType" value="New" required> New</label>
-                                <label><input type="radio" name="visitType" value="Follow-up"> Follow-up</label>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label>⚧ Gender *</label>
-                            <div class="radio-group">
-                                <label><input type="radio" name="gender" value="Male" required> Male</label>
-                                <label><input type="radio" name="gender" value="Female"> Female</label>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label>📞 Contact *</label>
-                            <input type="tel" id="contact" required placeholder="9876543210" pattern="[0-9]{10}">
-                        </div>
-                        <div class="form-group">
-                            <label>🏠 Address *</label>
-                            <input type="text" id="address" required placeholder="Mumbai">
-                        </div>
-                        <div class="form-group">
-                            <label>💻 Mode *</label>
-                            <div class="radio-group">
-                                <label><input type="radio" name="mode" value="Direct" required> Direct</label>
-                                <label><input type="radio" name="mode" value="Online"> Online</label>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label>📅 Status *</label>
-                            <select id="status" required>
-                                <option value="Scheduled">Scheduled</option>
-                                <option value="Waiting">Waiting</option>
-                                <option value="Checked">Checked</option>
-                                <option value="Completed">Completed</option>
-                                <option value="Cancelled">Cancelled</option>
-                            </select>
-                        </div>
-                        <div class="form-group full-width">
-                            <label>💬 Chief Complaint *</label>
-                            <textarea id="complaint" required placeholder="Fever, headache, etc."></textarea>
-                        </div>
-                        <div class="form-group full-width">
-                            <label>🧾 Diagnosis</label>
-                            <textarea id="diagnosis" placeholder="Enter diagnosis after consultation"></textarea>
-                        </div>
-                        <div class="form-group full-width">
-                            <label>💊 Prescribed Medicines</label>
-                            <textarea id="medicines" placeholder="Enter prescribed medicines"></textarea>
-                        </div>
-                        <div class="form-group">
-                            <label>📆 Next Visit</label>
-                            <input type="date" id="nextVisit">
-                        </div>
-                    </div>
-                    <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 20px;">
-                        Save Appointment
-                    </button>
-                </form>
-            </div>
+        </section>
+
+        <!-- Department Filter -->
+        <section class="filter-section">
+            <label id="filterLabel">Filter by Department:</label>
+            <select id="departmentFilter" onchange="filterByDepartment()">
+                <option value="">All Departments</option>
+                <option value="GEN">General</option>
+                <option value="ENT">ENT</option>
+                <option value="CAR">Cardiology</option>
+                <option value="ORT">Orthopedics</option>
+                <option value="PED">Pediatrics</option>
+                <option value="DER">Dermatology</option>
+                <option value="NEU">Neurology</option>
+            </select>
+        </section>
+
+        <!-- Current Patient Section -->
+        <section class="current-patient-section">
+            <h2 id="currentPatientTitle">Current Patient</h2>
+            <div id="currentPatientCard"></div>
+        </section>
+
+        <!-- Queue Section -->
+        <section class="queue-section">
+            <h2 id="queueTitle">Waiting Queue (<span id="queueCount">0</span>)</h2>
+            <div id="queueList" class="queue-list"></div>
+        </section>
+
+        <!-- Auto-refresh Indicator -->
+        <div class="refresh-indicator">
+            <div class="refresh-dot"></div>
+            <span id="refreshText">Auto-refreshing</span>
         </div>
     </div>
 
     <script>
-        const app = {
-            currentDoctor: null,
-            appointments: [],
-            editingId: null,
-            filterStatus: null,
-            filterToday: false,
+        // ═══════════════════════════════════════════════════════════════
+        // SESSION AUTHENTICATION CHECK
+        // ═══════════════════════════════════════════════════════════════
 
-            init() {
-                this.loadData();
-                this.checkLogin();
+        // Check if doctor is logged in
+        function checkAuthentication() {
+            const session = localStorage.getItem('doctorSession');
+
+            if (!session) {
+                // Redirect to login if not authenticated
+                alert('Please login first!');
+                window.location.href = 'doctor-login.html';
+                return null;
+            }
+
+            const doctorSession = JSON.parse(session);
+
+            if (!doctorSession.isLoggedIn) {
+                alert('Session expired. Please login again!');
+                window.location.href = 'doctor-login.html';
+                return null;
+            }
+
+            return doctorSession;
+        }
+
+        // Get logged in doctor's info
+        const doctorSession = checkAuthentication();
+
+        // If authentication failed, stop execution
+        if (!doctorSession) {
+            throw new Error('Not authenticated');
+        }
+
+        // Language translations
+        const translations = {
+            en: {
+                langBtn: 'தமிழ்',
+                dashboardTitle: '👨‍⚕️ Doctor Dashboard',
+                welcomeText: 'Welcome, Dr. Smith',
+                totalTodayLabel: 'Today',
+                completedTodayLabel: 'Completed',
+                filterLabel: 'Filter by Department:',
+                currentPatientTitle: 'Current Patient',
+                queueTitle: 'Waiting Queue',
+                refreshText: 'Auto-refreshing',
+                noPatient: 'No patient currently being consulted',
+                callNext: 'Call next patient to begin consultation',
+                tokenLabel: 'Token',
+                nameLabel: 'Name',
+                ageLabel: 'Age',
+                genderLabel: 'Gender',
+                contactLabel: 'Contact',
+                symptomsLabel: 'Symptoms',
+                completeBtn: 'Complete Consultation',
+                skipBtn: 'Skip Patient',
+                waitingSince: 'Waiting since',
+                emptyQueue: 'No patients in queue',
+                allCaughtUp: 'All caught up! No waiting patients.',
+                visitTypeLabel: 'Visit Type'
             },
-
-            checkLogin() {
-                const loggedIn = sessionStorage.getItem('loggedInDoctor');
-                if (loggedIn) {
-                    this.currentDoctor = loggedIn;
-                    this.showDashboard();
-                } else {
-                    document.getElementById('loginScreen').style.display = 'flex';
-                }
-            },
-
-            login(e) {
-                e.preventDefault();
-                const doctor = document.getElementById('doctorSelect').value;
-                const doctorId = document.getElementById('doctorId').value;
-
-                if (doctor && doctorId) {
-                    this.currentDoctor = doctor;
-                    sessionStorage.setItem('loggedInDoctor', doctor);
-                    sessionStorage.setItem('doctorId', doctorId);
-                    this.showDashboard();
-                }
-            },
-
-            logout() {
-                if (confirm('Are you sure you want to logout?')) {
-                    sessionStorage.removeItem('loggedInDoctor');
-                    sessionStorage.removeItem('doctorId');
-                    this.currentDoctor = null;
-                    document.getElementById('loginScreen').style.display = 'flex';
-                    document.getElementById('dashboard').classList.remove('active');
-                    document.getElementById('loginForm').reset();
-                }
-            },
-
-            showDashboard() {
-                document.getElementById('loginScreen').style.display = 'none';
-                document.getElementById('dashboard').classList.add('active');
-                document.getElementById('currentDoctor').textContent = this.currentDoctor;
-                document.getElementById('date').value = new Date().toISOString().split('T')[0];
-                this.renderAppointments();
-                this.updateStats();
-            },
-
-            loadData() {
-                const stored = sessionStorage.getItem('appointments');
-                if (stored) {
-                    this.appointments = JSON.parse(stored);
-                }
-            },
-
-            saveData() {
-                sessionStorage.setItem('appointments', JSON.stringify(this.appointments));
-            },
-
-            getMyAppointments() {
-                let filtered = this.appointments.filter(a => a.doctor === this.currentDoctor);
-
-                if (this.filterStatus) {
-                    filtered = filtered.filter(a => a.status === this.filterStatus);
-                }
-
-                if (this.filterToday) {
-                    const today = new Date().toISOString().split('T')[0];
-                    filtered = filtered.filter(a => a.date === today);
-                }
-
-                return filtered;
-            },
-
-            openAppointmentModal() {
-                this.editingId = null;
-                document.getElementById('appointmentModal').classList.add('active');
-            },
-
-            closeModal() {
-                document.getElementById('appointmentModal').classList.remove('active');
-                document.getElementById('appointmentForm').reset();
-                this.editingId = null;
-            },
-
-            saveAppointment(e) {
-                e.preventDefault();
-
-                const appointment = {
-                    id: this.editingId || Date.now().toString(),
-                    doctor: this.currentDoctor,
-                    date: document.getElementById('date').value,
-                    patientId: document.getElementById('patientId').value,
-                    visitType: document.querySelector('input[name="visitType"]:checked').value,
-                    gender: document.querySelector('input[name="gender"]:checked').value,
-                    mode: document.querySelector('input[name="mode"]:checked').value,
-                    contact: document.getElementById('contact').value,
-                    address: document.getElementById('address').value,
-                    complaint: document.getElementById('complaint').value,
-                    status: document.getElementById('status').value,
-                    diagnosis: document.getElementById('diagnosis').value,
-                    medicines: document.getElementById('medicines').value,
-                    nextVisit: document.getElementById('nextVisit').value
-                };
-
-                if (this.editingId) {
-                    const index = this.appointments.findIndex(a => a.id === this.editingId);
-                    this.appointments[index] = appointment;
-                } else {
-                    this.appointments.push(appointment);
-                }
-
-                this.saveData();
-                this.closeModal();
-                this.renderAppointments();
-                this.updateStats();
-                alert('✅ Appointment saved successfully!');
-            },
-
-            deleteAppointment(id) {
-                if (confirm('Delete this appointment?')) {
-                    this.appointments = this.appointments.filter(a => a.id !== id);
-                    this.saveData();
-                    this.renderAppointments();
-                    this.updateStats();
-                }
-            },
-
-            editAppointment(id) {
-                const apt = this.appointments.find(a => a.id === id);
-                if (!apt) return;
-
-                this.editingId = id;
-                document.getElementById('date').value = apt.date;
-                document.getElementById('patientId').value = apt.patientId;
-                document.querySelector(`input[name="visitType"][value="${apt.visitType}"]`).checked = true;
-                document.querySelector(`input[name="gender"][value="${apt.gender}"]`).checked = true;
-                document.querySelector(`input[name="mode"][value="${apt.mode}"]`).checked = true;
-                document.getElementById('contact').value = apt.contact;
-                document.getElementById('address').value = apt.address;
-                document.getElementById('complaint').value = apt.complaint;
-                document.getElementById('status').value = apt.status;
-                document.getElementById('diagnosis').value = apt.diagnosis || '';
-                document.getElementById('medicines').value = apt.medicines || '';
-                document.getElementById('nextVisit').value = apt.nextVisit || '';
-
-                this.openAppointmentModal();
-            },
-
-            renderAppointments() {
-                const tbody = document.getElementById('appointmentsTable');
-                const myAppts = this.getMyAppointments().sort((a, b) => new Date(b.date) - new Date(a.date));
-
-                tbody.innerHTML = myAppts.map(apt => `
-                    <tr>
-                        <td>${apt.date}</td>
-                        <td>${apt.patientId}</td>
-                        <td>${apt.visitType}</td>
-                        <td>${apt.gender}</td>
-                        <td>${apt.contact}</td>
-                        <td>${apt.address}</td>
-                        <td>${apt.mode}</td>
-                        <td>${apt.complaint}</td>
-                        <td><span class="status-badge status-${apt.status.toLowerCase()}">${apt.status}</span></td>
-                        <td>${apt.diagnosis || '-'}</td>
-                        <td>${apt.medicines || '-'}</td>
-                        <td>${apt.nextVisit || '-'}</td>
-                        <td>
-                            <button class="action-btn btn-primary" onclick="app.editAppointment('${apt.id}')">Edit</button>
-                            <button class="action-btn btn-danger" onclick="app.deleteAppointment('${apt.id}')">Delete</button>
-                        </td>
-                    </tr>
-                `).join('');
-
-                if (myAppts.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="13" style="text-align: center; padding: 40px;">No appointments found</td></tr>';
-                }
-            },
-
-            updateStats() {
-                const myAppts = this.appointments.filter(a => a.doctor === this.currentDoctor);
-                const totalAppts = myAppts.length;
-                const scheduledAppts = myAppts.filter(a => a.status === 'Scheduled').length;
-                const waitingAppts = myAppts.filter(a => a.status === 'Waiting').length;
-                const checkedAppts = myAppts.filter(a => a.status === 'Checked').length;
-                const completedAppts = myAppts.filter(a => a.status === 'Completed').length;
-                const cancelledAppts = myAppts.filter(a => a.status === 'Cancelled').length;
-
-                document.getElementById('totalAppts').textContent = totalAppts;
-                document.getElementById('scheduledAppts').textContent = scheduledAppts;
-                document.getElementById('waitingAppts').textContent = waitingAppts;
-                document.getElementById('checkedAppts').textContent = checkedAppts;
-                document.getElementById('completedAppts').textContent = completedAppts;
-                document.getElementById('cancelledAppts').textContent = cancelledAppts;
-            },
-
-            filterByStatus(status) {
-                this.filterStatus = status;
-                this.filterToday = false;
-                this.renderAppointments();
-            },
-
-            filterByToday() {
-                this.filterToday = true;
-                this.filterStatus = null;
-                this.renderAppointments();
-            },
-
-            clearFilters() {
-                this.filterStatus = null;
-                this.filterToday = false;
-                this.renderAppointments();
-            },
-
-            exportData() {
-                const myAppts = this.getMyAppointments();
-                const data = JSON.stringify(myAppts, null, 2);
-                const blob = new Blob([data], { type: 'application/json' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `${this.currentDoctor}-appointments-${new Date().toISOString().split('T')[0]}.json`;
-                a.click();
-                URL.revokeObjectURL(url);
-                alert('✅ Data exported successfully!');
+            ta: {
+                langBtn: 'English',
+                dashboardTitle: '👨‍⚕️ மருத்துவர் பலகை',
+                welcomeText: 'வரவேற்கிறோம், டாக்டர். ஸ்மித்',
+                totalTodayLabel: 'இன்று',
+                completedTodayLabel: 'முடிந்தது',
+                filterLabel: 'துறை வாரியாக வடிகட்டு:',
+                currentPatientTitle: 'தற்போதைய நோயாளி',
+                queueTitle: 'காத்திருப்பு வரிசை',
+                refreshText: 'தானாக புதுப்பிக்கப்படுகிறது',
+                noPatient: 'தற்போது எந்த நோயாளியும் ஆலோசனையில் இல்லை',
+                callNext: 'ஆலோசனையைத் தொடங்க அடுத்த நோயாளியை அழைக்கவும்',
+                tokenLabel: 'டோக்கன்',
+                nameLabel: 'பெயர்',
+                ageLabel: 'வயது',
+                genderLabel: 'பாலினம்',
+                contactLabel: 'தொலைபேசி',
+                symptomsLabel: 'அறிகுறிகள்',
+                completeBtn: 'ஆலோசனையை முடிக்கவும்',
+                skipBtn: 'நோயாளியைத் தவிர்க்கவும்',
+                waitingSince: 'காத்திருப்பு நேரம்',
+                emptyQueue: 'வரிசையில் நோயாளிகள் இல்லை',
+                allCaughtUp: 'அனைத்தும் முடிந்தது! காத்திருக்கும் நோயாளிகள் இல்லை.',
+                visitTypeLabel: 'வருகை வகை'
             }
         };
 
-        document.addEventListener('DOMContentLoaded', () => app.init());
-    </script>
-    <script type="module">
-        import { GoogleGenAI } from "https://aistudiocdn.com/@google/genai@^1.28.0";
+        let currentLang = 'en';
+        let currentPatient = null;
+        let selectedDepartment = '';
+        let refreshInterval = null;
 
-        // --- CONFIGURATION ---
-
-        // PASTE YOUR GEMINI API KEY HERE
-        const API_KEY = "AIzaSyCe_3sX0PA4dRh0r7s7UzWD-ys0YePULH4";
-
-        const SYSTEM_PROMPT = `You are MediBot, an AI medical assistant in a hospital system. 
-    
-            STRICT RULES:
-            1. ONLY respond to medical/healthcare queries:
-               - Symptoms, diseases, conditions
-               - Treatments, medications, procedures
-               - Appointments, hospital services
-               - Doctor specializations, departments
-               - Medical tests, diagnostics
-               - Health and wellness advice
-    
-            2. For NON-MEDICAL queries, respond: "I'm MediBot, a medical assistant. I can only help with health-related questions. Please ask about symptoms, treatments, appointments, or hospital services."
-    
-            3. Always add the disclaimer: "This is general information. Please consult a healthcare professional for personalized medical advice." at the end of every medical response.
-    
-            4. For urgent symptoms (e.g., chest pain, severe bleeding, difficulty breathing, sudden weakness), immediately say: "This sounds urgent. Please seek immediate medical attention or call emergency services." and stop the conversation.
-    
-            5. Be empathetic, clear, and use simple language. Avoid overly technical jargon.
-    
-            6. Keep responses concise and helpful. Use formatting like bullet points (e.g., "* item") to improve readability.`;
-
-        const INITIAL_GREETING = `Hello! I'm MediBot, your AI medical assistant. I can help you with:<br><br>
-                            &bull; Symptom analysis<br>
-                            &bull; Treatment information<br>
-                            &bull; Appointment guidance<br>
-                            &bull; Hospital services<br><br>
-                            How can I assist you today?`;
-
-        // --- DOM ELEMENTS ---
-        const fab = document.getElementById('medibot-fab');
-        const windowEl = document.getElementById('medibot-window');
-        const messagesEl = document.getElementById('medibot-messages');
-        const formEl = document.getElementById('medibot-form');
-        const inputEl = document.getElementById('medibot-input');
-        const sendBtn = document.getElementById('medibot-send');
-
-        // --- STATE ---
-        let isOpen = false;
-        let isLoading = false;
-        let isInitialized = false;
-        let chat = null;
-
-        // --- UI FUNCTIONS ---
-        function toggleChat() {
-            isOpen = !isOpen;
-            windowEl.classList.toggle('active');
-            fab.classList.toggle('active');
-            if (isOpen) {
-                inputEl.focus();
+        // Initialize language
+        function initializeLanguage() {
+            const savedLang = localStorage.getItem('preferredLanguage');
+            if (savedLang && translations[savedLang]) {
+                currentLang = savedLang;
+                applyLanguage(currentLang);
             }
         }
 
-        function scrollToBottom() {
-            messagesEl.scrollTop = messagesEl.scrollHeight;
+        // Toggle language
+        function toggleLanguage() {
+            currentLang = currentLang === 'en' ? 'ta' : 'en';
+            localStorage.setItem('preferredLanguage', currentLang);
+            applyLanguage(currentLang);
         }
 
-        function escapeHtml(text) {
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
+        // Apply language
+        function applyLanguage(lang) {
+            const t = translations[lang];
+            document.getElementById('langBtnText').textContent = t.langBtn;
+            document.getElementById('dashboardTitle').textContent = t.dashboardTitle;
+            document.getElementById('welcomeText').textContent = t.welcomeText;
+            document.getElementById('totalTodayLabel').textContent = t.totalTodayLabel;
+            document.getElementById('completedTodayLabel').textContent = t.completedTodayLabel;
+            document.getElementById('filterLabel').textContent = t.filterLabel;
+            document.getElementById('currentPatientTitle').textContent = t.currentPatientTitle;
+            document.getElementById('queueTitle').innerHTML = `${t.queueTitle} (<span id="queueCount">0</span>)`;
+            document.getElementById('refreshText').textContent = t.refreshText;
+
+            // Refresh displays
+            displayCurrentPatient();
+            displayQueue();
         }
 
-        function formatMessageText(text) {
-            let safeText = escapeHtml(text);
-            // Bold: **text** -> <strong>text</strong>
-            safeText = safeText.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-            // Unordered lists: * item or - item -> &bull; item
-            safeText = safeText.replace(/^\s*[\*-]\s+(.*)/gm, '&bull; $1');
-            // Newlines -> <br>
-            safeText = safeText.replace(/\n/g, '<br />');
-            // Clean up extra breaks that might be created by the list conversion
-            safeText = safeText.replace(/<br \/>&bull;/g, '&bull;');
-            return safeText;
+        // Get queue from localStorage
+        function getQueue() {
+            return JSON.parse(localStorage.getItem('hospitalQueue')) || [];
         }
 
-        function addMessage(text, role, isFormatted = false) {
-            const messageDiv = document.createElement('div');
-            messageDiv.className = `medibot-message ${role}`;
-
-            const avatar = role === 'bot' ? '🩺' : '👤';
-            const messageContent = isFormatted ? text : formatMessageText(text);
-
-            messageDiv.innerHTML = `
-                    <div class="medibot-message-avatar">${avatar}</div>
-                    <div class="medibot-message-bubble">${messageContent}</div>`;
-
-            messagesEl.appendChild(messageDiv);
-            scrollToBottom();
+        // Save queue to localStorage
+        function saveQueue(queue) {
+            localStorage.setItem('hospitalQueue', JSON.stringify(queue));
         }
 
-        function showTypingIndicator() {
-            const typingDiv = document.createElement('div');
-            typingDiv.id = 'medibot-typing-indicator';
-            typingDiv.className = 'medibot-message bot';
-            typingDiv.innerHTML = `
-                    <div class="medibot-message-avatar">🩺</div>
-                    <div class="medibot-message-bubble">
-                        <div class="medibot-typing-bubble">
-                            <span class="medibot-typing-dot"></span>
-                            <span class="medibot-typing-dot"></span>
-                            <span class="medibot-typing-dot"></span>
-                        </div>
-                    </div>`;
-            messagesEl.appendChild(typingDiv);
-            scrollToBottom();
+        // Filter queue by department
+        function getFilteredQueue() {
+            const queue = getQueue();
+            const waiting = queue.filter(p => p.status === 'Waiting');
+
+            if (selectedDepartment) {
+                return waiting.filter(p => p.department === selectedDepartment);
+            }
+            return waiting;
         }
 
-        function removeTypingIndicator() {
-            const indicator = document.getElementById('medibot-typing-indicator');
-            if (indicator) indicator.remove();
+        // Get next patient
+        function getNextPatient() {
+            const filteredQueue = getFilteredQueue();
+            return filteredQueue.length > 0 ? filteredQueue[0] : null;
         }
 
-        function setLoadingState(loading) {
-            isLoading = loading;
-            inputEl.disabled = loading;
-            sendBtn.disabled = loading;
-            inputEl.placeholder = loading ? "MediBot is thinking..." : "Type your medical question...";
-        }
+        // Display current patient
+        function displayCurrentPatient() {
+            const t = translations[currentLang];
+            const container = document.getElementById('currentPatientCard');
 
-        // --- API & INITIALIZATION ---
-        async function initializeApp() {
-            if (!API_KEY || API_KEY === "YOUR_API_KEY_HERE") {
-                console.error("MediBot Error: API_KEY is not set.");
-                addMessage("⚠️ I'm currently unavailable due to a configuration issue. Please add a valid API key.", 'bot');
-                setLoadingState(true);
-                inputEl.placeholder = "Chat unavailable";
+            if (!currentPatient) {
+                container.innerHTML = `
+                    <div class="patient-card empty">
+                        <div class="empty-state-icon">👤</div>
+                        <h3>${t.noPatient}</h3>
+                        <p>${t.callNext}</p>
+                    </div>
+                `;
                 return;
             }
 
-            try {
-                const ai = new GoogleGenAI({ apiKey: API_KEY });
-                chat = ai.chats.create({
-                    model: 'gemini-2.5-flash',
-                    config: { systemInstruction: SYSTEM_PROMPT, temperature: 0.7 }
-                });
-                isInitialized = true;
-                console.log("MediBot is initialized and ready.");
-                addMessage(INITIAL_GREETING, 'bot', true);
-            } catch (error) {
-                console.error("MediBot Initialization Error:", error);
-                addMessage("⚠️ I'm having trouble starting up. Please check the API key and refresh the page.", 'bot');
-                setLoadingState(true);
-                inputEl.placeholder = "Initialization failed";
+            container.innerHTML = `
+                <div class="patient-card">
+                    <div class="patient-details">
+                        <div class="patient-detail">
+                            <label>${t.tokenLabel}</label>
+                            <span>${currentPatient.token}</span>
+                        </div>
+                        <div class="patient-detail">
+                            <label>${t.nameLabel}</label>
+                            <span>${currentPatient.name}</span>
+                        </div>
+                        <div class="patient-detail">
+                            <label>${t.ageLabel}</label>
+                            <span>${currentPatient.age}</span>
+                        </div>
+                        <div class="patient-detail">
+                            <label>${t.genderLabel}</label>
+                            <span>${currentPatient.gender}</span>
+                        </div>
+                        <div class="patient-detail">
+                            <label>${t.contactLabel}</label>
+                            <span>${currentPatient.contact}</span>
+                        </div>
+                        <div class="patient-detail">
+                            <label>${t.visitTypeLabel}</label>
+                            <span>${currentPatient.visitType || 'N/A'}</span>
+                        </div>
+                    </div>
+                    <div class="patient-detail" style="grid-column: 1/-1;">
+                        <label>${t.symptomsLabel}</label>
+                        <span>${currentPatient.symptoms}</span>
+                    </div>
+                    <div class="patient-actions">
+                        <button class="btn-action btn-complete" onclick="completeConsultation()">
+                            ${t.completeBtn}
+                        </button>
+                        <button class="btn-action btn-skip" onclick="skipPatient()">
+                            ${t.skipBtn}
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Display queue
+        function displayQueue() {
+            const t = translations[currentLang];
+            const filteredQueue = getFilteredQueue();
+            const container = document.getElementById('queueList');
+            const countEl = document.getElementById('queueCount');
+
+            // Skip first patient if there's a current patient
+            const displayQueue = currentPatient ? filteredQueue.slice(1) : filteredQueue;
+
+            countEl.textContent = displayQueue.length;
+
+            if (displayQueue.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">✅</div>
+                        <h3>${t.emptyQueue}</h3>
+                        <p>${t.allCaughtUp}</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = displayQueue.map(patient => {
+                const waitTime = getWaitTime(patient.registeredAt);
+                return `
+                    <div class="queue-item">
+                        <div class="queue-item-info">
+                            <div class="queue-token">${patient.token}</div>
+                            <div class="queue-patient-info">
+                                <h4>${patient.name}</h4>
+                                <p>${patient.age} years • ${patient.gender} • ${patient.symptoms.substring(0, 50)}${patient.symptoms.length > 50 ? '...' : ''}</p>
+                            </div>
+                        </div>
+                        <div class="queue-time">
+                            ${t.waitingSince} ${waitTime}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Get wait time
+        function getWaitTime(registeredAt) {
+            const now = new Date();
+            const registered = new Date(registeredAt);
+            const diffMs = now - registered;
+            const diffMins = Math.floor(diffMs / 60000);
+
+            if (diffMins < 1) return 'Just now';
+            if (diffMins < 60) return `${diffMins} min`;
+            const hours = Math.floor(diffMins / 60);
+            const mins = diffMins % 60;
+            return `${hours}h ${mins}m`;
+        }
+
+        // Update statistics
+        function updateStats() {
+            const queue = getQueue();
+            const today = new Date().toDateString();
+
+            const todayPatients = queue.filter(p => {
+                const regDate = new Date(p.registeredAt).toDateString();
+                return regDate === today;
+            });
+
+            const completed = todayPatients.filter(p => p.status === 'Completed');
+
+            document.getElementById('totalToday').textContent = todayPatients.length;
+            document.getElementById('completedToday').textContent = completed.length;
+        }
+
+        // Call next patient
+        function callNextPatient() {
+            if (!currentPatient) {
+                const next = getNextPatient();
+                if (next) {
+                    currentPatient = next;
+                    displayCurrentPatient();
+                }
             }
         }
 
-        async function getBotResponse(userMessage) {
-            if (!isInitialized || !chat) {
-                return "I'm not ready yet. Please wait a moment or refresh the page.";
+        // Complete consultation
+        function completeConsultation() {
+            if (!currentPatient) return;
+
+            const queue = getQueue();
+            const index = queue.findIndex(p => p.token === currentPatient.token);
+
+            if (index !== -1) {
+                queue[index].status = 'Completed';
+                queue[index].completedAt = new Date().toISOString();
+                saveQueue(queue);
             }
-            try {
-                const result = await chat.sendMessage({ message: userMessage });
-                return result.text;
-            } catch (error) {
-                console.error('Gemini API Error:', error);
-                return "I apologize, but I'm having trouble connecting. Please try again in a moment.";
-            }
+
+            currentPatient = null;
+            refresh();
+            callNextPatient();
         }
 
-        // --- EVENT HANDLERS ---
-        async function handleFormSubmit(e) {
-            e.preventDefault();
-            const userText = inputEl.value.trim();
-            if (!userText || isLoading || !isInitialized) return;
+        // Skip patient
+        function skipPatient() {
+            if (!currentPatient) return;
 
-            addMessage(userText, 'user');
-            inputEl.value = '';
-            setLoadingState(true);
-            showTypingIndicator();
+            const queue = getQueue();
+            const index = queue.findIndex(p => p.token === currentPatient.token);
 
-            const botResponse = await getBotResponse(userText);
+            if (index !== -1) {
+                queue[index].status = 'Skipped';
+                queue[index].skippedAt = new Date().toISOString();
+                saveQueue(queue);
+            }
 
-            removeTypingIndicator();
-            addMessage(botResponse, 'bot');
-            setLoadingState(false);
-            inputEl.focus();
+            currentPatient = null;
+            refresh();
+            callNextPatient();
         }
 
-        // --- STARTUP ---
-        fab.addEventListener('click', toggleChat);
-        formEl.addEventListener('submit', handleFormSubmit);
-        initializeApp();
+        // Filter by department
+        function filterByDepartment() {
+            selectedDepartment = document.getElementById('departmentFilter').value;
+            currentPatient = null;
+            refresh();
+            callNextPatient();
+        }
 
+        // Refresh display
+        function refresh() {
+            updateStats();
+            displayCurrentPatient();
+            displayQueue();
+        }
+
+        // Auto-refresh every 3 seconds
+        function startAutoRefresh() {
+            refreshInterval = setInterval(() => {
+                refresh();
+                if (!currentPatient) {
+                    callNextPatient();
+                }
+            }, 3000);
+        }
+
+        // Initialize on load
+        window.onload = function () {
+            initializeLanguage();
+            refresh();
+            callNextPatient();
+            startAutoRefresh();
+        };
+
+        // Cleanup on unload
+        window.onbeforeunload = function () {
+            if (refreshInterval) {
+                clearInterval(refreshInterval);
+            }
+        };
     </script>
 </body>
 

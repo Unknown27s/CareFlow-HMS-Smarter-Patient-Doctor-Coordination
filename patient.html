@@ -763,6 +763,7 @@
             <h2 id="formHeading">Patient Registration</h2>
 
             <form id="patientForm" onsubmit="handleSubmit(event)">
+
                 <div class="form-group">
                     <label id="nameLabel">Name</label>
                     <input type="text" id="name" required>
@@ -771,6 +772,14 @@
                 <div class="form-group">
                     <label id="ageLabel">Age</label>
                     <input type="number" id="age" min="1" max="120" required>
+                </div>
+                <div class="form-group">
+                    <label id="nameLabel">visit Type</label>
+                    <select id="visitType" required>
+                        <option value="" id="selectOption">Select</option>
+                        <option value="New Patient" id="newPatientOption">New Patient</option>
+                        <option value="Follow-up" id="followUpOption">Follow-up</option>
+                    </select>
                 </div>
 
                 <div class="form-group">

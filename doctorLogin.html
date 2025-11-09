@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doctor Login - மருத்துவர் உள்நுழைவு</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        /* Language Toggle */
+        .language-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+
+        .lang-btn {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            color: white;
+            padding: 12px 24px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 25px;
+            font-size: 0.95em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .lang-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .lang-icon {
+            font-size: 1.2em;
+        }
+
+        /* Login Container */
+        .login-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            max-width: 450px;
+            width: 100%;
+            animation: slideUp 0.6s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Header */
+        .login-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px 30px;
+            text-align: center;
+        }
+
+        .login-header h1 {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .login-header p {
+            opacity: 0.9;
+            font-size: 0.95em;
+        }
+
+        .doctor-icon {
+            font-size: 4em;
+            margin-bottom: 20px;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        /* Login Form */
+        .login-form {
+            padding: 40px 30px;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 600;
+            font-size: 0.95em;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 14px 18px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            font-size: 1em;
+            transition: all 0.3s ease;
+            background: #f8f9fa;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+            background: white;
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+        }
+
+        .form-group select {
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23667eea' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 15px center;
+            padding-right: 40px;
+        }
+
+        /* Remember Me */
+        .remember-section {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 25px;
+        }
+
+        .remember-section input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .remember-section label {
+            font-size: 0.9em;
+            color: #666;
+            cursor: pointer;
+        }
+
+        /* Login Button */
+        .btn-login {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-login:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+        }
+
+        .btn-login:active {
+            transform: translateY(0);
+        }
+
+        .btn-login:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Error Message */
+        .error-message {
+            background: #fee;
+            color: #c33;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+            font-size: 0.9em;
+            border-left: 4px solid #c33;
+        }
+
+        .error-message.show {
+            display: block;
+            animation: shake 0.5s;
+        }
+
+        @keyframes shake {
+
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+
+            25% {
+                transform: translateX(-10px);
+            }
+
+            75% {
+                transform: translateX(10px);
+            }
+        }
+
+        /* Success Message */
+        .success-message {
+            background: #efe;
+            color: #3c3;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+            font-size: 0.9em;
+            border-left: 4px solid #3c3;
+        }
+
+        .success-message.show {
+            display: block;
+            animation: fadeIn 0.5s;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        /* Department Info */
+        .department-info {
+            background: #f0f4ff;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border-left: 4px solid #667eea;
+        }
+
+        .department-info h4 {
+            color: #667eea;
+            margin-bottom: 8px;
+            font-size: 0.95em;
+        }
+
+        .department-info p {
+            color: #666;
+            font-size: 0.85em;
+            line-height: 1.5;
+        }
+
+        /* Footer Links */
+        .login-footer {
+            text-align: center;
+            padding: 20px 30px;
+            background: #f8f9fa;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .login-footer a {
+            color: #667eea;
+            text-decoration: none;
+            font-size: 0.9em;
+            transition: color 0.3s;
+        }
+
+        .login-footer a:hover {
+            color: #764ba2;
+            text-decoration: underline;
+        }
+
+        /* Admin Note */
+        .admin-note {
+            background: #fff3cd;
+            color: #856404;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 0.85em;
+            border-left: 4px solid #ffc107;
+        }
+
+        /* Responsive */
+        @media (max-width: 480px) {
+            .login-header {
+                padding: 30px 20px;
+            }
+
+            .login-header h1 {
+                font-size: 1.5em;
+            }
+
+            .login-form {
+                padding: 30px 20px;
+            }
+        }
+
+        /* Loading Spinner */
+        .spinner {
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top: 3px solid white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            margin-left: 10px;
+            vertical-align: middle;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Language Toggle -->
+    <div class="language-toggle">
+        <button class="lang-btn" onclick="toggleLanguage()">
+            <span class="lang-icon">🌐</span>
+            <span id="langBtnText">தமிழ்</span>
+        </button>
+    </div>
+
+    <!-- Login Container -->
+    <div class="login-container">
+        <!-- Header -->
+        <div class="login-header">
+            <div class="doctor-icon">👨‍⚕️</div>
+            <h1 id="loginTitle">Doctor Login</h1>
+            <p id="loginSubtitle">Access your patient queue dashboard</p>
+        </div>
+
+        <!-- Login Form -->
+        <div class="login-form">
+            <div class="error-message" id="errorMessage"></div>
+            <div class="success-message" id="successMessage"></div>
+
+            <div class="admin-note">
+                <strong id="demoNoteTitle">Demo Credentials:</strong>
+                <p id="demoNoteText">Username: <code>doctor</code> | Password: <code>demo123</code></p>
+            </div>
+
+            <form id="loginForm" onsubmit="handleLogin(event)">
+                <div class="form-group">
+                    <label id="usernameLabel">Username / Employee ID</label>
+                    <input type="text" id="username" required autocomplete="username">
+                </div>
+
+                <div class="form-group">
+                    <label id="passwordLabel">Password</label>
+                    <input type="password" id="password" required autocomplete="current-password">
+                </div>
+
+                <div class="form-group">
+                    <label id="departmentLabel">Select Your Department</label>
+                    <select id="department" required>
+                        <option value="" id="selectDeptOption">-- Choose Department --</option>
+                        <option value="GEN">General Medicine</option>
+                        <option value="ENT">ENT (Ear, Nose, Throat)</option>
+                        <option value="CAR">Cardiology</option>
+                        <option value="ORT">Orthopedics</option>
+                        <option value="PED">Pediatrics</option>
+                        <option value="DER">Dermatology</option>
+                        <option value="NEU">Neurology</option>
+                    </select>
+                </div>
+
+                <div class="department-info">
+                    <h4 id="importantNote">⚠️ Important Note</h4>
+                    <p id="departmentNote">You can only select ONE department per session. This ensures focused patient
+                        care and prevents queue conflicts.</p>
+                </div>
+
+                <div class="remember-section">
+                    <input type="checkbox" id="rememberMe">
+                    <label for="rememberMe" id="rememberLabel">Remember my department</label>
+                </div>
+
+                <button type="submit" class="btn-login" id="loginBtn">
+                    <span id="loginBtnText">Login to Dashboard</span>
+                </button>
+            </form>
+        </div>
+
+        <!-- Footer -->
+        <div class="login-footer">
+            <a href="#" id="forgotPassword">Forgot Password?</a> |
+            <a href="#" id="contactAdmin">Contact Admin</a>
+        </div>
+    </div>
+
+    <script>
+        // Language translations
+        const translations = {
+            en: {
+                langBtn: 'தமிழ்',
+                loginTitle: 'Doctor Login',
+                loginSubtitle: 'Access your patient queue dashboard',
+                demoNoteTitle: 'Demo Credentials:',
+                demoNoteText: 'Username: doctor | Password: demo123',
+                usernameLabel: 'Username / Employee ID',
+                passwordLabel: 'Password',
+                departmentLabel: 'Select Your Department',
+                selectDeptOption: '-- Choose Department --',
+                importantNote: '⚠️ Important Note',
+                departmentNote: 'You can only select ONE department per session. This ensures focused patient care and prevents queue conflicts.',
+                rememberLabel: 'Remember my department',
+                loginBtnText: 'Login to Dashboard',
+                forgotPassword: 'Forgot Password?',
+                contactAdmin: 'Contact Admin',
+                errorInvalidCreds: 'Invalid username or password',
+                errorSelectDept: 'Please select a department',
+                successLogin: 'Login successful! Redirecting to dashboard...',
+                loggingIn: 'Logging in...'
+            },
+            ta: {
+                langBtn: 'English',
+                loginTitle: 'மருத்துவர் உள்நுழைவு',
+                loginSubtitle: 'உங்கள் நோயாளி வரிசை பலகையை அணுகவும்',
+                demoNoteTitle: 'டெமோ சான்றுகள்:',
+                demoNoteText: 'பயனர்பெயர்: doctor | கடவுச்சொல்: demo123',
+                usernameLabel: 'பயனர்பெயர் / பணியாளர் ஐடி',
+                passwordLabel: 'கடவுச்சொல்',
+                departmentLabel: 'உங்கள் துறையைத் தேர்ந்தெடுக்கவும்',
+                selectDeptOption: '-- துறையைத் தேர்வு செய்க --',
+                importantNote: '⚠️ முக்கிய குறிப்பு',
+                departmentNote: 'ஒரு அமர்விற்கு நீங்கள் ஒரே ஒரு துறையை மட்டுமே தேர்ந்தெடுக்க முடியும். இது கவனமான நோயாளி பராமரிப்பை உறுதி செய்கிறது.',
+                rememberLabel: 'என் துறையை நினைவில் வைத்துக் கொள்ளுங்கள்',
+                loginBtnText: 'பலகையில் உள்நுழைக',
+                forgotPassword: 'கடவுச்சொல்லை மறந்துவிட்டீர்களா?',
+                contactAdmin: 'நிர்வாகியைத் தொடர்பு கொள்ளுங்கள்',
+                errorInvalidCreds: 'தவறான பயனர்பெயர் அல்லது கடவுச்சொல்',
+                errorSelectDept: 'தயவுசெய்து ஒரு துறையைத் தேர்ந்தெடுக்கவும்',
+                successLogin: 'உள்நுழைவு வெற்றிகரமாக! பலகைக்கு திருப்பிவிடப்படுகிறது...',
+                loggingIn: 'உள்நுழைகிறது...'
+            }
+        };
+
+        let currentLang = 'en';
+
+        // Initialize language
+        function initializeLanguage() {
+            const savedLang = localStorage.getItem('preferredLanguage');
+            if (savedLang && translations[savedLang]) {
+                currentLang = savedLang;
+                applyLanguage(currentLang);
+            }
+
+            // Load remembered department
+            const rememberMe = localStorage.getItem('rememberDepartment');
+            const savedDept = localStorage.getItem('doctorDepartment');
+
+            if (rememberMe === 'true' && savedDept) {
+                document.getElementById('department').value = savedDept;
+                document.getElementById('rememberMe').checked = true;
+            }
+        }
+
+        // Toggle language
+        function toggleLanguage() {
+            currentLang = currentLang === 'en' ? 'ta' : 'en';
+            localStorage.setItem('preferredLanguage', currentLang);
+            applyLanguage(currentLang);
+        }
+
+        // Apply language
+        function applyLanguage(lang) {
+            const t = translations[lang];
+
+            document.getElementById('langBtnText').textContent = t.langBtn;
+            document.getElementById('loginTitle').textContent = t.loginTitle;
+            document.getElementById('loginSubtitle').textContent = t.loginSubtitle;
+            document.getElementById('demoNoteTitle').textContent = t.demoNoteTitle;
+            document.getElementById('demoNoteText').innerHTML = t.demoNoteText;
+            document.getElementById('usernameLabel').textContent = t.usernameLabel;
+            document.getElementById('passwordLabel').textContent = t.passwordLabel;
+            document.getElementById('departmentLabel').textContent = t.departmentLabel;
+            document.getElementById('selectDeptOption').textContent = t.selectDeptOption;
+            document.getElementById('importantNote').textContent = t.importantNote;
+            document.getElementById('departmentNote').textContent = t.departmentNote;
+            document.getElementById('rememberLabel').textContent = t.rememberLabel;
+            document.getElementById('loginBtnText').textContent = t.loginBtnText;
+            document.getElementById('forgotPassword').textContent = t.forgotPassword;
+            document.getElementById('contactAdmin').textContent = t.contactAdmin;
+        }
+
+        // Show error message
+        function showError(message) {
+            const errorEl = document.getElementById('errorMessage');
+            errorEl.textContent = message;
+            errorEl.classList.add('show');
+
+            setTimeout(() => {
+                errorEl.classList.remove('show');
+            }, 4000);
+        }
+
+        // Show success message
+        function showSuccess(message) {
+            const successEl = document.getElementById('successMessage');
+            successEl.textContent = message;
+            successEl.classList.add('show');
+        }
+
+        // Handle login
+        function handleLogin(event) {
+            event.preventDefault();
+
+            const t = translations[currentLang];
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value;
+            const department = document.getElementById('department').value;
+            const rememberMe = document.getElementById('rememberMe').checked;
+            const loginBtn = document.getElementById('loginBtn');
+            const btnText = document.getElementById('loginBtnText');
+
+            // Validate department selection
+            if (!department) {
+                showError(t.errorSelectDept);
+                return;
+            }
+
+            // Simple authentication (In production, this should be server-side)
+            // Demo credentials: username: doctor, password: demo123
+            if (username.toLowerCase() === 'doctor' && password === 'demo123') {
+                // Disable button and show loading
+                loginBtn.disabled = true;
+                btnText.innerHTML = t.loggingIn + ' <span class="spinner"></span>';
+
+                // Save doctor session
+                const doctorSession = {
+                    username: username,
+                    department: department,
+                    loginTime: new Date().toISOString(),
+                    isLoggedIn: true
+                };
+
+                localStorage.setItem('doctorSession', JSON.stringify(doctorSession));
+
+                // Save department preference if remember is checked
+                if (rememberMe) {
+                    localStorage.setItem('rememberDepartment', 'true');
+                    localStorage.setItem('doctorDepartment', department);
+                } else {
+                    localStorage.removeItem('rememberDepartment');
+                    localStorage.removeItem('doctorDepartment');
+                }
+
+                // Show success message
+                showSuccess(t.successLogin);
+
+                // Redirect to doctor dashboard after 1.5 seconds
+                setTimeout(() => {
+                    // Redirect to doctor dashboard
+                    window.location.href = 'doctor.html';
+                }, 1500);
+
+            } else {
+                showError(t.errorInvalidCreds);
+            }
+        }
+
+        // Check if already logged in
+        function checkExistingSession() {
+            const session = localStorage.getItem('doctorSession');
+            if (session) {
+                const doctorSession = JSON.parse(session);
+                if (doctorSession.isLoggedIn) {
+                    // Optional: Auto-redirect if already logged in
+                    // window.location.href = 'doctor-dashboard.html';
+                }
+            }
+        }
+
+        // Initialize on load
+        window.onload = function () {
+            initializeLanguage();
+            checkExistingSession();
+        };
+
+        // Add logout functionality (can be called from dashboard)
+        function logout() {
+            localStorage.removeItem('doctorSession');
+            window.location.href = 'login.html';
+        }
+
+        // Make logout available globally
+        window.logout = logout;
+    </script>
+</body>
+
+</html>

@@ -70,8 +70,6 @@ FEATURES:
 ═══════════════════════════════════════════════════════════════════════
 */
 
-// ==================== server.js ====================
-
 const express = require('express');
 const http = require('http');
 const WebSocket = require('ws');
@@ -80,6 +78,7 @@ const bodyParser = require('body-parser');
 const path = require('path');
 const Database = require('./database');
 
+// Consolidated server: Express app + HTTP server + WebSocket
 const app = express();
 const server = http.createServer(app);
 const wss = new WebSocket.Server({ server });
@@ -87,50 +86,45 @@ const wss = new WebSocket.Server({ server });
 // Middleware
 app.use(cors());
 app.use(bodyParser.json());
-app.use(express.static('public'));
+app.use(express.static(path.join(__dirname)));
 
 // Initialize database
 const db = new Database();
 
-// Store connected clients
+// Store connected WebSocket clients
 const clients = new Set();
 
 // WebSocket connection handler
 wss.on('connection', (ws) => {
-    console.log('New client connected');
+    console.log('New WS client connected');
     clients.add(ws);
 
     // Send current queue to newly connected client
     db.getTodayQueue().then(queue => {
-        ws.send(JSON.stringify({
-            type: 'INITIAL_QUEUE',
-            data: queue
-        }));
-    });
+        try { ws.send(JSON.stringify({ type: 'INITIAL_QUEUE', data: queue })); } catch (e) { }
+    }).catch(() => { });
 
     ws.on('close', () => {
-        console.log('Client disconnected');
         clients.delete(ws);
     });
 
-    ws.on('error', (error) => {
-        console.error('WebSocket error:', error);
+    ws.on('error', () => {
         clients.delete(ws);
     });
 });
 
 // Broadcast to all connected clients
 function broadcast(message) {
+    const payload = JSON.stringify(message);
     clients.forEach(client => {
-        if (client.readyState === WebSocket.OPEN) {
-            client.send(JSON.stringify(message));
-        }
+        if (client.readyState === WebSocket.OPEN) client.send(payload);
     });
 }
 
 // API Routes
 
 // Register new patient
+// Register new patient (called by patient form)
 app.post('/api/register', async (req, res) => {
     try {
         const patientData = req.body;
@@ -142,51 +136,30 @@ app.post('/api/register', async (req, res) => {
         if (existingPatient) {
             patientId = existingPatient.id;
             patientData.isReturning = true;
-            patientData.lastVisit = existingPatient.lastVisit;
-            patientData.visitCount = existingPatient.visitCount + 1;
+            patientData.lastVisit = existingPatient.last_visit || null;
+            patientData.visitCount = (existingPatient.visit_count || 1) + 1;
         } else {
             patientId = await db.addPatient(patientData);
             patientData.isReturning = false;
             patientData.visitCount = 1;
         }
 
-        // Generate token for department
+        // Generate token for department and add to queue
         const token = await db.generateToken(patientData.department);
-        patientData.token = token;
-        patientData.status = 'Waiting';
-
-        // Add to today's queue
         const queueEntry = await db.addToQueue({
             patientId,
             token,
             department: patientData.department,
-            symptoms: patientData.symptoms,
+            symptoms: patientData.symptoms || '',
             status: 'Waiting'
         });
 
-        // Get queue position
         const position = await db.getQueuePosition(token, patientData.department);
 
-        // Broadcast new registration to all connected clients
-        broadcast({
-            type: 'NEW_REGISTRATION',
-            data: {
-                ...patientData,
-                patientId,
-                queueId: queueEntry.id,
-                position
-            }
-        });
+        // Broadcast to WS clients (doctor dashboard should listen for this)
+        broadcast({ type: 'NEW_REGISTRATION', data: { token, department: patientData.department, patientId, position, name: patientData.name } });
 
-        res.json({
-            success: true,
-            token,
-            position,
-            isReturning: patientData.isReturning,
-            visitCount: patientData.visitCount,
-            patientId
-        });
-
+        res.json({ success: true, token, position, patientId });
     } catch (error) {
         console.error('Registration error:', error);
         res.status(500).json({ success: false, error: error.message });
