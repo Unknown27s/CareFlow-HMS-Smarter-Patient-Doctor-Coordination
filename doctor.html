@@ -99,6 +99,31 @@
             font-size: 1.1em;
         }
 
+        .doctor-name {
+            color: #1976d2;
+            font-weight: 700;
+            font-size: 1.2em;
+        }
+
+        .logout-btn {
+            background: linear-gradient(135deg, #f44336 0%, #e91e63 100%);
+            color: white;
+            padding: 10px 24px;
+            border: none;
+            border-radius: 20px;
+            font-size: 0.95em;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(244, 67, 54, 0.3);
+            transition: all 0.3s ease;
+            margin-top: 10px;
+        }
+
+        .logout-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(244, 67, 54, 0.4);
+        }
+
         .header-stats {
             display: flex;
             gap: 20px;
@@ -459,7 +484,11 @@
             <div class="header-content">
                 <div class="doctor-info">
                     <h1 id="dashboardTitle">👨‍⚕️ Doctor Dashboard</h1>
-                    <p id="welcomeText">Welcome, Dr. Smith</p>
+                    <p>Welcome, <span id="doctorName" class="doctor-name">Doctor</span></p>
+                    <p style="font-size: 0.9em; color: #888; margin-top: 5px;">
+                        <span id="doctorDepartment"></span>
+                    </p>
+                    <button class="logout-btn" onclick="logout()">🚪 Logout</button>
                 </div>
                 <div class="header-stats">
                     <div class="stat-card">
@@ -472,21 +501,6 @@
                     </div>
                 </div>
             </div>
-        </section>
-
-        <!-- Department Filter -->
-        <section class="filter-section">
-            <label id="filterLabel">Filter by Department:</label>
-            <select id="departmentFilter" onchange="filterByDepartment()">
-                <option value="">All Departments</option>
-                <option value="GEN">General</option>
-                <option value="ENT">ENT</option>
-                <option value="CAR">Cardiology</option>
-                <option value="ORT">Orthopedics</option>
-                <option value="PED">Pediatrics</option>
-                <option value="DER">Dermatology</option>
-                <option value="NEU">Neurology</option>
-            </select>
         </section>
 
         <!-- Current Patient Section -->
@@ -551,7 +565,6 @@
                 welcomeText: 'Welcome, Dr. Smith',
                 totalTodayLabel: 'Today',
                 completedTodayLabel: 'Completed',
-                filterLabel: 'Filter by Department:',
                 currentPatientTitle: 'Current Patient',
                 queueTitle: 'Waiting Queue',
                 refreshText: 'Auto-refreshing',
@@ -576,7 +589,6 @@
                 welcomeText: 'வரவேற்கிறோம், டாக்டர். ஸ்மித்',
                 totalTodayLabel: 'இன்று',
                 completedTodayLabel: 'முடிந்தது',
-                filterLabel: 'துறை வாரியாக வடிகட்டு:',
                 currentPatientTitle: 'தற்போதைய நோயாளி',
                 queueTitle: 'காத்திருப்பு வரிசை',
                 refreshText: 'தானாக புதுப்பிக்கப்படுகிறது',
@@ -599,14 +611,62 @@
 
         let currentLang = 'en';
         let currentPatient = null;
-        let selectedDepartment = '';
         let refreshInterval = null;
+        let ws = null; // WebSocket connection
+
+        // Connect to WebSocket server for real-time updates
+        function connectWebSocket() {
+            try {
+                ws = new WebSocket('ws://localhost:3000');
+
+                ws.onopen = () => {
+                    console.log('WebSocket connected');
+                };
+
+                ws.onmessage = (event) => {
+                    try {
+                        const message = JSON.parse(event.data);
+
+                        if (message.type === 'INITIAL_QUEUE') {
+                            // Load initial queue data
+                            console.log('Received initial queue:', message.data);
+                            refresh();
+                        } else if (message.type === 'NEW_REGISTRATION') {
+                            // New patient registered - refresh the queue
+                            console.log('New patient registered:', message.data);
+                            refresh();
+                        } else if (message.type === 'STATUS_UPDATE') {
+                            // Patient status updated
+                            console.log('Status updated:', message.data);
+                            refresh();
+                        }
+                    } catch (error) {
+                        console.error('Error processing WebSocket message:', error);
+                    }
+                };
+
+                ws.onerror = (error) => {
+                    console.error('WebSocket error:', error);
+                };
+
+                ws.onclose = () => {
+                    console.log('WebSocket disconnected. Reconnecting in 5s...');
+                    setTimeout(connectWebSocket, 5000);
+                };
+            } catch (error) {
+                console.error('Failed to connect to WebSocket:', error);
+                setTimeout(connectWebSocket, 5000);
+            }
+        }
 
         // Initialize language
         function initializeLanguage() {
             const savedLang = localStorage.getItem('preferredLanguage');
             if (savedLang && translations[savedLang]) {
                 currentLang = savedLang;
+                applyLanguage(currentLang);
+            } else {
+                // Apply default language and update doctor info
                 applyLanguage(currentLang);
             }
         }
@@ -623,10 +683,19 @@
             const t = translations[lang];
             document.getElementById('langBtnText').textContent = t.langBtn;
             document.getElementById('dashboardTitle').textContent = t.dashboardTitle;
-            document.getElementById('welcomeText').textContent = t.welcomeText;
+
+            // Update welcome text with doctor's name
+            const doctorNameEl = document.getElementById('doctorName');
+            if (doctorSession) {
+                doctorNameEl.textContent = `Dr. ${doctorSession.name}`;
+                const deptEl = document.getElementById('doctorDepartment');
+                if (doctorSession.department) {
+                    deptEl.textContent = `Department: ${doctorSession.department}`;
+                }
+            }
+
             document.getElementById('totalTodayLabel').textContent = t.totalTodayLabel;
             document.getElementById('completedTodayLabel').textContent = t.completedTodayLabel;
-            document.getElementById('filterLabel').textContent = t.filterLabel;
             document.getElementById('currentPatientTitle').textContent = t.currentPatientTitle;
             document.getElementById('queueTitle').innerHTML = `${t.queueTitle} (<span id="queueCount">0</span>)`;
             document.getElementById('refreshText').textContent = t.refreshText;
@@ -636,30 +705,50 @@
             displayQueue();
         }
 
-        // Get queue from localStorage
-        function getQueue() {
-            return JSON.parse(localStorage.getItem('hospitalQueue')) || [];
-        }
+        // Get queue from server
+        async function getQueue() {
+            try {
+                const response = await fetch('http://localhost:3000/api/queue');
+                const data = await response.json();
 
-        // Save queue to localStorage
-        function saveQueue(queue) {
-            localStorage.setItem('hospitalQueue', JSON.stringify(queue));
-        }
-
-        // Filter queue by department
-        function getFilteredQueue() {
-            const queue = getQueue();
-            const waiting = queue.filter(p => p.status === 'Waiting');
-
-            if (selectedDepartment) {
-                return waiting.filter(p => p.department === selectedDepartment);
+                if (data.success) {
+                    return data.queue || [];
+                }
+                return [];
+            } catch (error) {
+                console.error('Error fetching queue:', error);
+                return [];
             }
+        }
+
+        // Save queue status update to server
+        async function saveQueueStatus(queueId, status) {
+            try {
+                const response = await fetch(`http://localhost:3000/api/queue/${queueId}/status`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ status })
+                });
+
+                return await response.json();
+            } catch (error) {
+                console.error('Error updating queue status:', error);
+                return { success: false };
+            }
+        }
+
+        // Get all waiting patients (no department filtering)
+        async function getFilteredQueue() {
+            const queue = await getQueue();
+            const waiting = queue.filter(p => p.status === 'Waiting');
             return waiting;
         }
 
         // Get next patient
-        function getNextPatient() {
-            const filteredQueue = getFilteredQueue();
+        async function getNextPatient() {
+            const filteredQueue = await getFilteredQueue();
             return filteredQueue.length > 0 ? filteredQueue[0] : null;
         }
 
@@ -703,13 +792,13 @@
                             <span>${currentPatient.contact}</span>
                         </div>
                         <div class="patient-detail">
-                            <label>${t.visitTypeLabel}</label>
-                            <span>${currentPatient.visitType || 'N/A'}</span>
+                            <label>Visit Count</label>
+                            <span>${currentPatient.visit_count || 1}</span>
                         </div>
                     </div>
                     <div class="patient-detail" style="grid-column: 1/-1;">
                         <label>${t.symptomsLabel}</label>
-                        <span>${currentPatient.symptoms}</span>
+                        <span>${currentPatient.symptoms || 'No symptoms recorded'}</span>
                     </div>
                     <div class="patient-actions">
                         <button class="btn-action btn-complete" onclick="completeConsultation()">
@@ -724,18 +813,18 @@
         }
 
         // Display queue
-        function displayQueue() {
+        async function displayQueue() {
             const t = translations[currentLang];
-            const filteredQueue = getFilteredQueue();
+            const filteredQueue = await getFilteredQueue();
             const container = document.getElementById('queueList');
             const countEl = document.getElementById('queueCount');
 
             // Skip first patient if there's a current patient
-            const displayQueue = currentPatient ? filteredQueue.slice(1) : filteredQueue;
+            const displayQueueList = currentPatient ? filteredQueue.slice(1) : filteredQueue;
 
-            countEl.textContent = displayQueue.length;
+            countEl.textContent = displayQueueList.length;
 
-            if (displayQueue.length === 0) {
+            if (displayQueueList.length === 0) {
                 container.innerHTML = `
                     <div class="empty-state">
                         <div class="empty-state-icon">✅</div>
@@ -746,15 +835,15 @@
                 return;
             }
 
-            container.innerHTML = displayQueue.map(patient => {
-                const waitTime = getWaitTime(patient.registeredAt);
+            container.innerHTML = displayQueueList.map(patient => {
+                const waitTime = getWaitTime(patient.registered_at);
                 return `
                     <div class="queue-item">
                         <div class="queue-item-info">
                             <div class="queue-token">${patient.token}</div>
                             <div class="queue-patient-info">
                                 <h4>${patient.name}</h4>
-                                <p>${patient.age} years • ${patient.gender} • ${patient.symptoms.substring(0, 50)}${patient.symptoms.length > 50 ? '...' : ''}</p>
+                                <p>${patient.age} years • ${patient.gender} • ${(patient.symptoms || '').substring(0, 50)}${(patient.symptoms || '').length > 50 ? '...' : ''}</p>
                             </div>
                         </div>
                         <div class="queue-time">
@@ -780,12 +869,12 @@
         }
 
         // Update statistics
-        function updateStats() {
-            const queue = getQueue();
+        async function updateStats() {
+            const queue = await getQueue();
             const today = new Date().toDateString();
 
             const todayPatients = queue.filter(p => {
-                const regDate = new Date(p.registeredAt).toDateString();
+                const regDate = new Date(p.registered_at).toDateString();
                 return regDate === today;
             });
 
@@ -796,9 +885,9 @@
         }
 
         // Call next patient
-        function callNextPatient() {
+        async function callNextPatient() {
             if (!currentPatient) {
-                const next = getNextPatient();
+                const next = await getNextPatient();
                 if (next) {
                     currentPatient = next;
                     displayCurrentPatient();
@@ -807,54 +896,34 @@
         }
 
         // Complete consultation
-        function completeConsultation() {
+        async function completeConsultation() {
             if (!currentPatient) return;
 
-            const queue = getQueue();
-            const index = queue.findIndex(p => p.token === currentPatient.token);
-
-            if (index !== -1) {
-                queue[index].status = 'Completed';
-                queue[index].completedAt = new Date().toISOString();
-                saveQueue(queue);
-            }
+            // Update status on server
+            await saveQueueStatus(currentPatient.queue_id, 'Completed');
 
             currentPatient = null;
-            refresh();
-            callNextPatient();
+            await refresh();
+            await callNextPatient();
         }
 
         // Skip patient
-        function skipPatient() {
+        async function skipPatient() {
             if (!currentPatient) return;
 
-            const queue = getQueue();
-            const index = queue.findIndex(p => p.token === currentPatient.token);
-
-            if (index !== -1) {
-                queue[index].status = 'Skipped';
-                queue[index].skippedAt = new Date().toISOString();
-                saveQueue(queue);
-            }
+            // Update status on server
+            await saveQueueStatus(currentPatient.queue_id, 'Skipped');
 
             currentPatient = null;
-            refresh();
-            callNextPatient();
-        }
-
-        // Filter by department
-        function filterByDepartment() {
-            selectedDepartment = document.getElementById('departmentFilter').value;
-            currentPatient = null;
-            refresh();
-            callNextPatient();
+            await refresh();
+            await callNextPatient();
         }
 
         // Refresh display
-        function refresh() {
-            updateStats();
+        async function refresh() {
+            await updateStats();
             displayCurrentPatient();
-            displayQueue();
+            await displayQueue();
         }
 
         // Auto-refresh every 3 seconds
@@ -867,11 +936,20 @@
             }, 3000);
         }
 
+        // Logout function
+        function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                localStorage.removeItem('doctorSession');
+                window.location.href = 'doctorLogin.html';
+            }
+        }
+
         // Initialize on load
-        window.onload = function () {
+        window.onload = async function () {
             initializeLanguage();
-            refresh();
-            callNextPatient();
+            connectWebSocket(); // Connect to real-time updates
+            await refresh();
+            await callNextPatient();
             startAutoRefresh();
         };
 
@@ -879,6 +957,9 @@
         window.onbeforeunload = function () {
             if (refreshInterval) {
                 clearInterval(refreshInterval);
+            }
+            if (ws) {
+                ws.close();
             }
         };
     </script>

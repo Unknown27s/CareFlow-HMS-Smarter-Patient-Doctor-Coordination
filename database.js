@@ -3,6 +3,7 @@
 const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
 const fs = require('fs');
+const bcrypt = require('bcryptjs');
 
 class Database {
     constructor() {
@@ -119,6 +120,43 @@ class Database {
             this.db.run(`CREATE INDEX IF NOT EXISTS idx_appointments_date ON appointments(appointment_date)`);
             this.db.run(`CREATE INDEX IF NOT EXISTS idx_appointments_doctor ON appointments(doctor_id)`);
             this.db.run(`CREATE INDEX IF NOT EXISTS idx_translations_lang ON translations(language_id)`);
+
+            // Create default admin user if it doesn't exist
+            this.db.get(`SELECT id FROM users WHERE username = 'admin' AND role = 'admin'`, [], (err, row) => {
+                if (err) {
+                    console.error('Error checking for admin user:', err);
+                    return;
+                }
+
+                if (!row) {
+                    // Hash the default admin password
+                    const bcrypt = require('bcryptjs');
+                    bcrypt.genSalt(10, (err, salt) => {
+                        if (err) {
+                            console.error('Error generating salt:', err);
+                            return;
+                        }
+
+                        bcrypt.hash('admin123', salt, (err, hash) => {
+                            if (err) {
+                                console.error('Error hashing password:', err);
+                                return;
+                            }
+
+                            this.db.run(`
+                                INSERT INTO users (username, password_hash, name, role)
+                                VALUES ('admin', ?, 'System Administrator', 'admin')
+                            `, [hash], function (err) {
+                                if (err) {
+                                    console.error('Error creating default admin user:', err);
+                                } else {
+                                    console.log('✅ Default admin user created (username: admin, password: admin123)');
+                                }
+                            });
+                        });
+                    });
+                }
+            });
         });
     }
 
@@ -377,19 +415,74 @@ class Database {
 
     // User authentication methods
     async createUser(userData) {
-        const { username, password_hash, name, role, department } = userData;
-        return await this.run(`
+        const { username, password, name, role, department } = userData;
+
+        // Hash password with bcrypt
+        const salt = await bcrypt.genSalt(10);
+        const password_hash = await bcrypt.hash(password, salt);
+
+        const result = await this.run(`
             INSERT INTO users (username, password_hash, name, role, department)
             VALUES (?, ?, ?, ?, ?)
         `, [username, password_hash, name, role, department]);
+
+        return result.lastID;
     }
 
-    async authenticateUser(username, password_hash) {
+    async authenticateUser(loginInput, password) {
+        // Try to find user by username first (works for both doctors and admins)
+        let user = await this.get(`
+            SELECT id, username, password_hash, name, role, department
+            FROM users
+            WHERE username = ?
+        `, [loginInput]);
+
+        // If not found by username, try by name (only for doctors)
+        if (!user) {
+            user = await this.get(`
+                SELECT id, username, password_hash, name, role, department
+                FROM users
+                WHERE name = ? AND role = 'doctor'
+            `, [loginInput]);
+        }
+
+        if (!user) {
+            return null;
+        }
+
+        // Compare password with hash
+        const isValid = await bcrypt.compare(password, user.password_hash);
+
+        if (!isValid) {
+            return null;
+        }
+
+        // Return user without password hash
+        const { password_hash, ...userWithoutPassword } = user;
+        return userWithoutPassword;
+    }
+
+    async getUserByUsername(username) {
         return await this.get(`
-            SELECT id, username, name, role, department 
+            SELECT id, username, name, role, department, created_at
             FROM users 
-            WHERE username = ? AND password_hash = ?
-        `, [username, password_hash]);
+            WHERE username = ?
+        `, [username]);
+    }
+
+    async getAllDoctors() {
+        return await this.all(`
+            SELECT id, username, name, department, created_at
+            FROM users 
+            WHERE role = 'doctor'
+            ORDER BY created_at DESC
+        `);
+    }
+
+    async deleteUser(userId) {
+        return await this.run(`
+            DELETE FROM users WHERE id = ?
+        `, [userId]);
     }
 
     // Appointment methods

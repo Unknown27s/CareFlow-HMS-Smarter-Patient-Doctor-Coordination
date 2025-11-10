@@ -1076,7 +1076,7 @@
             return waitingPatients.length;
         }
 
-        function handleSubmit(event) {
+        async function handleSubmit(event) {
             event.preventDefault();
 
             const name = document.getElementById('name').value;
@@ -1086,38 +1086,43 @@
             const contact = document.getElementById('contact').value;
             const symptoms = document.getElementById('symptoms').value;
 
-            const token = generateToken(department);
+            // Submit to server API
+            try {
+                const response = await fetch('http://localhost:3000/api/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        name,
+                        age: parseInt(age),
+                        gender,
+                        department,
+                        contact,
+                        symptoms
+                    })
+                });
 
-            const patient = {
-                token: token,
-                department: department,
-                name: name,
-                age: age,
-                gender: gender,
-                contact: contact,
-                symptoms: symptoms,
-                status: 'Waiting',
-                registeredAt: new Date().toISOString(),
-                timestamp: Date.now()
-            };
+                const data = await response.json();
 
-            const queue = JSON.parse(localStorage.getItem('hospitalQueue')) || [];
-            queue.push(patient);
-            localStorage.setItem('hospitalQueue', JSON.stringify(queue));
-
-            currentToken = token;
-            currentDepartment = department;
-
-            showConfirmation(token, department);
+                if (data.success) {
+                    currentToken = data.token;
+                    currentDepartment = department;
+                    showConfirmation(data.token, department, data.position);
+                } else {
+                    alert('Registration failed: ' + (data.error || 'Unknown error'));
+                }
+            } catch (error) {
+                console.error('Registration error:', error);
+                alert('Failed to register. Please make sure the server is running.');
+            }
         }
 
-        function showConfirmation(token, department) {
+        function showConfirmation(token, department, position) {
             document.getElementById('registrationForm').classList.remove('active');
 
-            const position = getQueuePosition(token, department);
-
             document.getElementById('tokenNumber').textContent = token;
-            document.getElementById('queuePosition').textContent = position;
+            document.getElementById('queuePosition').textContent = position || 1;
 
             document.getElementById('confirmation').classList.add('active');
             document.getElementById('confirmation').scrollIntoView({

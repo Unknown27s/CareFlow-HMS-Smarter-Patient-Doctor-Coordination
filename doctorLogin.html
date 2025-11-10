@@ -391,8 +391,9 @@
 
             <form id="loginForm" onsubmit="handleLogin(event)">
                 <div class="form-group">
-                    <label id="usernameLabel">Username / Employee ID</label>
-                    <input type="text" id="username" required autocomplete="username">
+                    <label id="usernameLabel">Username / Name / Employee ID</label>
+                    <input type="text" id="username" required autocomplete="username"
+                        placeholder="Enter username, full name, or employee ID">
                 </div>
 
                 <div class="form-group">
@@ -400,29 +401,10 @@
                     <input type="password" id="password" required autocomplete="current-password">
                 </div>
 
-                <div class="form-group">
-                    <label id="departmentLabel">Select Your Department</label>
-                    <select id="department" required>
-                        <option value="" id="selectDeptOption">-- Choose Department --</option>
-                        <option value="GEN">General Medicine</option>
-                        <option value="ENT">ENT (Ear, Nose, Throat)</option>
-                        <option value="CAR">Cardiology</option>
-                        <option value="ORT">Orthopedics</option>
-                        <option value="PED">Pediatrics</option>
-                        <option value="DER">Dermatology</option>
-                        <option value="NEU">Neurology</option>
-                    </select>
-                </div>
-
                 <div class="department-info">
-                    <h4 id="importantNote">⚠️ Important Note</h4>
-                    <p id="departmentNote">You can only select ONE department per session. This ensures focused patient
-                        care and prevents queue conflicts.</p>
-                </div>
-
-                <div class="remember-section">
-                    <input type="checkbox" id="rememberMe">
-                    <label for="rememberMe" id="rememberLabel">Remember my department</label>
+                    <h4 id="importantNote">ℹ️ Information</h4>
+                    <p id="departmentNote">Your department will be automatically assigned based on your account. Contact
+                        admin to change your department.</p>
                 </div>
 
                 <button type="submit" class="btn-login" id="loginBtn">
@@ -446,19 +428,15 @@
                 loginTitle: 'Doctor Login',
                 loginSubtitle: 'Access your patient queue dashboard',
                 demoNoteTitle: 'Demo Credentials:',
-                demoNoteText: 'Username: doctor | Password: demo123',
-                usernameLabel: 'Username / Employee ID',
+                demoNoteText: 'You can login using your username, full name, or employee ID. Contact admin to create your account',
+                usernameLabel: 'Username / Name / Employee ID',
                 passwordLabel: 'Password',
-                departmentLabel: 'Select Your Department',
-                selectDeptOption: '-- Choose Department --',
-                importantNote: '⚠️ Important Note',
-                departmentNote: 'You can only select ONE department per session. This ensures focused patient care and prevents queue conflicts.',
-                rememberLabel: 'Remember my department',
+                importantNote: 'ℹ️ Information',
+                departmentNote: 'Your department will be automatically assigned based on your account. Contact admin to change your department.',
                 loginBtnText: 'Login to Dashboard',
                 forgotPassword: 'Forgot Password?',
                 contactAdmin: 'Contact Admin',
                 errorInvalidCreds: 'Invalid username or password',
-                errorSelectDept: 'Please select a department',
                 successLogin: 'Login successful! Redirecting to dashboard...',
                 loggingIn: 'Logging in...'
             },
@@ -467,19 +445,15 @@
                 loginTitle: 'மருத்துவர் உள்நுழைவு',
                 loginSubtitle: 'உங்கள் நோயாளி வரிசை பலகையை அணுகவும்',
                 demoNoteTitle: 'டெமோ சான்றுகள்:',
-                demoNoteText: 'பயனர்பெயர்: doctor | கடவுச்சொல்: demo123',
-                usernameLabel: 'பயனர்பெயர் / பணியாளர் ஐடி',
+                demoNoteText: 'உங்கள் பயனர்பெயர், முழு பெயர் அல்லது பணியாளர் ஐடியைப் பயன்படுத்தி உள்நுழையலாம். உங்கள் கணக்கை உருவாக்க நிர்வாகியைத் தொடர்பு கொள்ளுங்கள்',
+                usernameLabel: 'பயனர்பெயர் / பெயர் / பணியாளர் ஐடி',
                 passwordLabel: 'கடவுச்சொல்',
-                departmentLabel: 'உங்கள் துறையைத் தேர்ந்தெடுக்கவும்',
-                selectDeptOption: '-- துறையைத் தேர்வு செய்க --',
-                importantNote: '⚠️ முக்கிய குறிப்பு',
-                departmentNote: 'ஒரு அமர்விற்கு நீங்கள் ஒரே ஒரு துறையை மட்டுமே தேர்ந்தெடுக்க முடியும். இது கவனமான நோயாளி பராமரிப்பை உறுதி செய்கிறது.',
-                rememberLabel: 'என் துறையை நினைவில் வைத்துக் கொள்ளுங்கள்',
+                importantNote: 'ℹ️ தகவல்',
+                departmentNote: 'உங்கள் கணக்கின் அடிப்படையில் உங்கள் துறை தானாகவே ஒதுக்கப்படும். உங்கள் துறையை மாற்ற நிர்வாகியைத் தொடர்பு கொள்ளுங்கள்.',
                 loginBtnText: 'பலகையில் உள்நுழைக',
                 forgotPassword: 'கடவுச்சொல்லை மறந்துவிட்டீர்களா?',
                 contactAdmin: 'நிர்வாகியைத் தொடர்பு கொள்ளுங்கள்',
                 errorInvalidCreds: 'தவறான பயனர்பெயர் அல்லது கடவுச்சொல்',
-                errorSelectDept: 'தயவுசெய்து ஒரு துறையைத் தேர்ந்தெடுக்கவும்',
                 successLogin: 'உள்நுழைவு வெற்றிகரமாக! பலகைக்கு திருப்பிவிடப்படுகிறது...',
                 loggingIn: 'உள்நுழைகிறது...'
             }
@@ -493,15 +467,6 @@
             if (savedLang && translations[savedLang]) {
                 currentLang = savedLang;
                 applyLanguage(currentLang);
-            }
-
-            // Load remembered department
-            const rememberMe = localStorage.getItem('rememberDepartment');
-            const savedDept = localStorage.getItem('doctorDepartment');
-
-            if (rememberMe === 'true' && savedDept) {
-                document.getElementById('department').value = savedDept;
-                document.getElementById('rememberMe').checked = true;
             }
         }
 
@@ -523,11 +488,8 @@
             document.getElementById('demoNoteText').innerHTML = t.demoNoteText;
             document.getElementById('usernameLabel').textContent = t.usernameLabel;
             document.getElementById('passwordLabel').textContent = t.passwordLabel;
-            document.getElementById('departmentLabel').textContent = t.departmentLabel;
-            document.getElementById('selectDeptOption').textContent = t.selectDeptOption;
             document.getElementById('importantNote').textContent = t.importantNote;
             document.getElementById('departmentNote').textContent = t.departmentNote;
-            document.getElementById('rememberLabel').textContent = t.rememberLabel;
             document.getElementById('loginBtnText').textContent = t.loginBtnText;
             document.getElementById('forgotPassword').textContent = t.forgotPassword;
             document.getElementById('contactAdmin').textContent = t.contactAdmin;
@@ -552,60 +514,63 @@
         }
 
         // Handle login
-        function handleLogin(event) {
+        async function handleLogin(event) {
             event.preventDefault();
 
             const t = translations[currentLang];
             const username = document.getElementById('username').value.trim();
             const password = document.getElementById('password').value;
-            const department = document.getElementById('department').value;
-            const rememberMe = document.getElementById('rememberMe').checked;
             const loginBtn = document.getElementById('loginBtn');
             const btnText = document.getElementById('loginBtnText');
 
-            // Validate department selection
-            if (!department) {
-                showError(t.errorSelectDept);
-                return;
-            }
+            // Disable button and show loading
+            loginBtn.disabled = true;
+            btnText.innerHTML = t.loggingIn + ' <span class="spinner"></span>';
 
-            // Simple authentication (In production, this should be server-side)
-            // Demo credentials: username: doctor, password: demo123
-            if (username.toLowerCase() === 'doctor' && password === 'demo123') {
-                // Disable button and show loading
-                loginBtn.disabled = true;
-                btnText.innerHTML = t.loggingIn + ' <span class="spinner"></span>';
+            try {
+                // Call server API to authenticate
+                const response = await fetch('/api/doctor/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ loginInput: username, password })
+                });
 
-                // Save doctor session
-                const doctorSession = {
-                    username: username,
-                    department: department,
-                    loginTime: new Date().toISOString(),
-                    isLoggedIn: true
-                };
+                const result = await response.json();
 
-                localStorage.setItem('doctorSession', JSON.stringify(doctorSession));
+                if (result.success && result.user) {
+                    // Save doctor session with department from database
+                    const doctorSession = {
+                        id: result.user.id,
+                        username: result.user.username,
+                        name: result.user.name,
+                        department: result.user.department,
+                        role: result.user.role,
+                        loginTime: new Date().toISOString(),
+                        isLoggedIn: true
+                    };
 
-                // Save department preference if remember is checked
-                if (rememberMe) {
-                    localStorage.setItem('rememberDepartment', 'true');
-                    localStorage.setItem('doctorDepartment', department);
+                    localStorage.setItem('doctorSession', JSON.stringify(doctorSession));
+
+                    // Show success message
+                    showSuccess(t.successLogin);
+
+                    // Redirect to doctor dashboard after 1.5 seconds
+                    setTimeout(() => {
+                        window.location.href = 'doctor.html';
+                    }, 1500);
+
                 } else {
-                    localStorage.removeItem('rememberDepartment');
-                    localStorage.removeItem('doctorDepartment');
+                    showError(t.errorInvalidCreds);
+                    loginBtn.disabled = false;
+                    btnText.textContent = t.loginBtnText;
                 }
-
-                // Show success message
-                showSuccess(t.successLogin);
-
-                // Redirect to doctor dashboard after 1.5 seconds
-                setTimeout(() => {
-                    // Redirect to doctor dashboard
-                    window.location.href = 'doctor.html';
-                }, 1500);
-
-            } else {
-                showError(t.errorInvalidCreds);
+            } catch (error) {
+                console.error('Login error:', error);
+                showError('Connection error. Please check if server is running.');
+                loginBtn.disabled = false;
+                btnText.textContent = t.loginBtnText;
             }
         }
 

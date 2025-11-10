@@ -236,6 +236,127 @@ app.get('/api/stats', async (req, res) => {
     }
 });
 
+// ============================================
+// Admin API Routes
+// ============================================
+
+// Get all doctors (admin)
+app.get('/api/admin/doctors', async (req, res) => {
+    try {
+        const doctors = await db.getAllDoctors();
+        res.json({ success: true, doctors });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// Create new doctor (admin)
+app.post('/api/admin/doctors', async (req, res) => {
+    try {
+        const { username, password, name, department } = req.body;
+
+        // Validate required fields
+        if (!username || !password || !name || !department) {
+            return res.status(400).json({
+                success: false,
+                error: 'All fields are required'
+            });
+        }
+
+        // Check if username already exists
+        const existing = await db.getUserByUsername(username);
+        if (existing) {
+            return res.status(400).json({
+                success: false,
+                error: 'Username already exists'
+            });
+        }
+
+        // Create doctor with hashed password
+        const doctorId = await db.createUser({
+            username,
+            password,
+            name,
+            department,
+            role: 'doctor'
+        });
+
+        res.json({ success: true, doctorId });
+    } catch (error) {
+        console.error('Create doctor error:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// Delete doctor (admin)
+app.delete('/api/admin/doctors/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        await db.deleteUser(id);
+        res.json({ success: true });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// Doctor login
+app.post('/api/doctor/login', async (req, res) => {
+    try {
+        const { loginInput, password } = req.body;
+
+        const user = await db.authenticateUser(loginInput, password);
+
+        if (user && user.role === 'doctor') {
+            res.json({
+                success: true,
+                user: {
+                    id: user.id,
+                    username: user.username,
+                    name: user.name,
+                    department: user.department,
+                    role: user.role
+                }
+            });
+        } else {
+            res.status(401).json({
+                success: false,
+                error: 'Invalid credentials or not a doctor'
+            });
+        }
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// Admin login
+app.post('/api/admin/login', async (req, res) => {
+    try {
+        const { username, password } = req.body;
+
+        const user = await db.authenticateUser(username, password);
+
+        if (user && user.role === 'admin') {
+            res.json({
+                success: true,
+                user: {
+                    id: user.id,
+                    username: user.username,
+                    name: user.name,
+                    role: user.role
+                }
+            });
+        } else {
+            res.status(401).json({
+                success: false,
+                error: 'Invalid admin credentials'
+            });
+        }
+    } catch (error) {
+        console.error('Admin login error:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
 // Get server IP addresses
 app.get('/api/network-info', (req, res) => {
     const os = require('os');
