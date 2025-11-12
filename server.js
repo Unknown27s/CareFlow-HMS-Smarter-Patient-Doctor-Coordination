@@ -70,8 +70,6 @@ FEATURES:
 ═══════════════════════════════════════════════════════════════════════
 */
 
-// ==================== server.js ====================
-
 const express = require('express');
 const http = require('http');
 const WebSocket = require('ws');
@@ -80,6 +78,7 @@ const bodyParser = require('body-parser');
 const path = require('path');
 const Database = require('./database');
 
+// Consolidated server: Express app + HTTP server + WebSocket
 const app = express();
 const server = http.createServer(app);
 const wss = new WebSocket.Server({ server });
@@ -87,50 +86,45 @@ const wss = new WebSocket.Server({ server });
 // Middleware
 app.use(cors());
 app.use(bodyParser.json());
-app.use(express.static('public'));
+app.use(express.static(path.join(__dirname)));
 
 // Initialize database
 const db = new Database();
 
-// Store connected clients
+// Store connected WebSocket clients
 const clients = new Set();
 
 // WebSocket connection handler
 wss.on('connection', (ws) => {
-    console.log('New client connected');
+    console.log('New WS client connected');
     clients.add(ws);
 
     // Send current queue to newly connected client
     db.getTodayQueue().then(queue => {
-        ws.send(JSON.stringify({
-            type: 'INITIAL_QUEUE',
-            data: queue
-        }));
-    });
+        try { ws.send(JSON.stringify({ type: 'INITIAL_QUEUE', data: queue })); } catch (e) { }
+    }).catch(() => { });
 
     ws.on('close', () => {
-        console.log('Client disconnected');
         clients.delete(ws);
     });
 
-    ws.on('error', (error) => {
-        console.error('WebSocket error:', error);
+    ws.on('error', () => {
         clients.delete(ws);
     });
 });
 
 // Broadcast to all connected clients
 function broadcast(message) {
+    const payload = JSON.stringify(message);
     clients.forEach(client => {
-        if (client.readyState === WebSocket.OPEN) {
-            client.send(JSON.stringify(message));
-        }
+        if (client.readyState === WebSocket.OPEN) client.send(payload);
     });
 }
 
 // API Routes
 
 // Register new patient
+// Register new patient (called by patient form)
 app.post('/api/register', async (req, res) => {
     try {
         const patientData = req.body;
@@ -142,51 +136,30 @@ app.post('/api/register', async (req, res) => {
         if (existingPatient) {
             patientId = existingPatient.id;
             patientData.isReturning = true;
-            patientData.lastVisit = existingPatient.lastVisit;
-            patientData.visitCount = existingPatient.visitCount + 1;
+            patientData.lastVisit = existingPatient.last_visit || null;
+            patientData.visitCount = (existingPatient.visit_count || 1) + 1;
         } else {
             patientId = await db.addPatient(patientData);
             patientData.isReturning = false;
             patientData.visitCount = 1;
         }
 
-        // Generate token for department
+        // Generate token for department and add to queue
         const token = await db.generateToken(patientData.department);
-        patientData.token = token;
-        patientData.status = 'Waiting';
-
-        // Add to today's queue
         const queueEntry = await db.addToQueue({
             patientId,
             token,
             department: patientData.department,
-            symptoms: patientData.symptoms,
+            symptoms: patientData.symptoms || '',
             status: 'Waiting'
         });
 
-        // Get queue position
         const position = await db.getQueuePosition(token, patientData.department);
 
-        // Broadcast new registration to all connected clients
-        broadcast({
-            type: 'NEW_REGISTRATION',
-            data: {
-                ...patientData,
-                patientId,
-                queueId: queueEntry.id,
-                position
-            }
-        });
+        // Broadcast to WS clients (doctor dashboard should listen for this)
+        broadcast({ type: 'NEW_REGISTRATION', data: { token, department: patientData.department, patientId, position, name: patientData.name } });
 
-        res.json({
-            success: true,
-            token,
-            position,
-            isReturning: patientData.isReturning,
-            visitCount: patientData.visitCount,
-            patientId
-        });
-
+        res.json({ success: true, token, position, patientId });
     } catch (error) {
         console.error('Registration error:', error);
         res.status(500).json({ success: false, error: error.message });
@@ -259,6 +232,127 @@ app.get('/api/stats', async (req, res) => {
         const stats = await db.getStatistics();
         res.json({ success: true, stats });
     } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// ============================================
+// Admin API Routes
+// ============================================
+
+// Get all doctors (admin)
+app.get('/api/admin/doctors', async (req, res) => {
+    try {
+        const doctors = await db.getAllDoctors();
+        res.json({ success: true, doctors });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// Create new doctor (admin)
+app.post('/api/admin/doctors', async (req, res) => {
+    try {
+        const { username, password, name, department } = req.body;
+
+        // Validate required fields
+        if (!username || !password || !name || !department) {
+            return res.status(400).json({
+                success: false,
+                error: 'All fields are required'
+            });
+        }
+
+        // Check if username already exists
+        const existing = await db.getUserByUsername(username);
+        if (existing) {
+            return res.status(400).json({
+                success: false,
+                error: 'Username already exists'
+            });
+        }
+
+        // Create doctor with hashed password
+        const doctorId = await db.createUser({
+            username,
+            password,
+            name,
+            department,
+            role: 'doctor'
+        });
+
+        res.json({ success: true, doctorId });
+    } catch (error) {
+        console.error('Create doctor error:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// Delete doctor (admin)
+app.delete('/api/admin/doctors/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        await db.deleteUser(id);
+        res.json({ success: true });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// Doctor login
+app.post('/api/doctor/login', async (req, res) => {
+    try {
+        const { loginInput, password } = req.body;
+
+        const user = await db.authenticateUser(loginInput, password);
+
+        if (user && user.role === 'doctor') {
+            res.json({
+                success: true,
+                user: {
+                    id: user.id,
+                    username: user.username,
+                    name: user.name,
+                    department: user.department,
+                    role: user.role
+                }
+            });
+        } else {
+            res.status(401).json({
+                success: false,
+                error: 'Invalid credentials or not a doctor'
+            });
+        }
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// Admin login
+app.post('/api/admin/login', async (req, res) => {
+    try {
+        const { username, password } = req.body;
+
+        const user = await db.authenticateUser(username, password);
+
+        if (user && user.role === 'admin') {
+            res.json({
+                success: true,
+                user: {
+                    id: user.id,
+                    username: user.username,
+                    name: user.name,
+                    role: user.role
+                }
+            });
+        } else {
+            res.status(401).json({
+                success: false,
+                error: 'Invalid admin credentials'
+            });
+        }
+    } catch (error) {
+        console.error('Admin login error:', error);
         res.status(500).json({ success: false, error: error.message });
     }
 });
