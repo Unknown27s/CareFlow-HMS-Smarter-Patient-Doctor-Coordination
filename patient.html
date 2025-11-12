@@ -830,6 +830,17 @@
                 <span id="tokenNumber" style="font-size: 1.2em;"></span>
             </div>
 
+            <!-- QR Code Display -->
+            <div class="qr-code-section" id="qrCodeSection" style="display: none; margin: 20px 0;">
+                <h3 style="color: #1976d2; margin-bottom: 15px;">Your QR Code</h3>
+                <div style="background: white; padding: 20px; border-radius: 15px; display: inline-block; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+                    <img id="qrCodeImage" src="" alt="Patient QR Code" style="max-width: 250px; height: auto;">
+                </div>
+                <p style="margin-top: 15px; color: #666; font-size: 0.95em;">
+                    📱 Save or screenshot this QR code for quick check-in
+                </p>
+            </div>
+
             <div class="queue-info">
                 <p class="queue-info-text">
                     <strong id="peopleBeforeLabel">People before you:</strong>
@@ -1128,7 +1139,7 @@
                 if (data.success) {
                     currentToken = data.token;
                     currentDepartment = department;
-                    showConfirmation(data.token, department, data.position);
+                    showConfirmation(data.token, department, data.position, data.qrCode);
                 } else {
                     alert('Registration failed: ' + (data.error || 'Unknown error'));
                 }
@@ -1138,11 +1149,17 @@
             }
         }
 
-        function showConfirmation(token, department, position) {
+        function showConfirmation(token, department, position, qrCode) {
             document.getElementById('registrationForm').classList.remove('active');
 
             document.getElementById('tokenNumber').textContent = token;
             document.getElementById('queuePosition').textContent = position || 1;
+
+            // Display QR code if available
+            if (qrCode) {
+                document.getElementById('qrCodeImage').src = qrCode;
+                document.getElementById('qrCodeSection').style.display = 'block';
+            }
 
             document.getElementById('confirmation').classList.add('active');
             document.getElementById('confirmation').scrollIntoView({

@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR Code Scanner - Patient Check-in</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 800px;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .datetime-display {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 15px;
+        }
+
+        .datetime-display .date {
+            font-size: 1.2em;
+            font-weight: 600;
+        }
+
+        .datetime-display .time {
+            font-size: 2em;
+            font-weight: bold;
+            margin-top: 5px;
+            font-family: 'Courier New', monospace;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .scanner-section {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        #qr-input {
+            width: 100%;
+            padding: 15px;
+            font-size: 1.1em;
+            border: 2px solid #667eea;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            transition: all 0.3s;
+        }
+
+        #qr-input:focus {
+            outline: none;
+            border-color: #764ba2;
+            box-shadow: 0 0 0 3px rgba(118, 75, 162, 0.1);
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 40px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .result-section {
+            display: none;
+            margin-top: 30px;
+            padding: 25px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+        }
+
+        .result-section.show {
+            display: block;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .result-section h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.5em;
+        }
+
+        .patient-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .info-item {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .info-label {
+            font-size: 0.85em;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .info-value {
+            font-size: 1.2em;
+            color: #333;
+            font-weight: 600;
+            margin-top: 5px;
+        }
+
+        .scan-timestamp {
+            background: #e8f5e9;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            text-align: center;
+        }
+
+        .scan-timestamp .label {
+            font-size: 0.9em;
+            color: #2e7d32;
+            margin-bottom: 5px;
+        }
+
+        .scan-timestamp .value {
+            font-size: 1.3em;
+            color: #1b5e20;
+            font-weight: bold;
+        }
+
+        .error-message {
+            background: #ffebee;
+            color: #c62828;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+            animation: shake 0.5s;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        .instructions {
+            background: #e3f2fd;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+        }
+
+        .instructions h4 {
+            color: #1565c0;
+            margin-bottom: 10px;
+        }
+
+        .instructions ul {
+            list-style-position: inside;
+            color: #1976d2;
+        }
+
+        .instructions li {
+            margin: 5px 0;
+        }
+
+        @media (max-width: 600px) {
+            .header h1 {
+                font-size: 1.5em;
+            }
+
+            .datetime-display .time {
+                font-size: 1.5em;
+            }
+
+            .content {
+                padding: 20px;
+            }
+
+            .patient-info {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏥 QR Code Scanner</h1>
+            <p>Patient Check-in System</p>
+            <div class="datetime-display">
+                <div class="date" id="currentDate">Loading...</div>
+                <div class="time" id="currentTime">00:00:00</div>
+            </div>
+        </div>
+
+        <div class="content">
+            <div class="instructions">
+                <h4>📋 How to Use:</h4>
+                <ul>
+                    <li>Patient shows their QR code from registration</li>
+                    <li>Paste or type the QR code data in the field below</li>
+                    <li>Click "Scan QR Code" to verify patient information</li>
+                    <li>The current date and time will be recorded</li>
+                </ul>
+            </div>
+
+            <div class="scanner-section">
+                <input 
+                    type="text" 
+                    id="qr-input" 
+                    placeholder="Paste QR code data here or scan..."
+                    autocomplete="off"
+                >
+                <button class="btn" onclick="scanQRCode()">🔍 Scan QR Code</button>
+            </div>
+
+            <div class="error-message" id="errorMessage"></div>
+
+            <div class="result-section" id="resultSection">
+                <h3>✅ Patient Information</h3>
+                
+                <div class="patient-info" id="patientInfo">
+                    <!-- Patient info will be displayed here -->
+                </div>
+
+                <div class="scan-timestamp">
+                    <div class="label">Scanned At:</div>
+                    <div class="value" id="scanTimestamp">--</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Real-time clock update
+        function updateClock() {
+            const now = new Date();
+            
+            const dateOptions = { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            };
+            const dateStr = now.toLocaleDateString('en-US', dateOptions);
+            
+            const timeStr = now.toLocaleTimeString('en-US', { 
+                hour12: true,
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+            
+            document.getElementById('currentDate').textContent = dateStr;
+            document.getElementById('currentTime').textContent = timeStr;
+        }
+
+        // Update clock every second
+        setInterval(updateClock, 1000);
+        updateClock(); // Initial call
+
+        // Scan QR Code function
+        async function scanQRCode() {
+            const qrInput = document.getElementById('qr-input');
+            const qrData = qrInput.value.trim();
+            const errorMessage = document.getElementById('errorMessage');
+            const resultSection = document.getElementById('resultSection');
+
+            // Hide previous results
+            errorMessage.classList.remove('show');
+            resultSection.classList.remove('show');
+
+            if (!qrData) {
+                showError('Please enter QR code data');
+                return;
+            }
+
+            try {
+                // Call API to scan/decode QR code
+                const response = await fetch('/api/qr/scan', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ qrData })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    displayPatientInfo(result.scanInfo);
+                } else {
+                    showError(result.error || 'Failed to scan QR code');
+                }
+            } catch (error) {
+                console.error('Scan error:', error);
+                showError('Error scanning QR code. Please check the data and try again.');
+            }
+        }
+
+        // Display patient information
+        function displayPatientInfo(scanInfo) {
+            const patientInfoDiv = document.getElementById('patientInfo');
+            const scanTimestampDiv = document.getElementById('scanTimestamp');
+            const resultSection = document.getElementById('resultSection');
+
+            // Build patient info HTML
+            let infoHTML = `
+                <div class="info-item">
+                    <div class="info-label">Patient Name</div>
+                    <div class="info-value">${scanInfo.name}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Token Number</div>
+                    <div class="info-value">${scanInfo.token}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Department</div>
+                    <div class="info-value">${scanInfo.department}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Contact</div>
+                    <div class="info-value">${scanInfo.contact}</div>
+                </div>
+            `;
+
+            if (scanInfo.latestInfo) {
+                infoHTML += `
+                    <div class="info-item">
+                        <div class="info-label">Age</div>
+                        <div class="info-value">${scanInfo.latestInfo.age} years</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Gender</div>
+                        <div class="info-value">${scanInfo.latestInfo.gender}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Visit Count</div>
+                        <div class="info-value">#${scanInfo.latestInfo.visitCount}</div>
+                    </div>
+                `;
+            }
+
+            patientInfoDiv.innerHTML = infoHTML;
+            scanTimestampDiv.textContent = scanInfo.currentDateTime;
+            resultSection.classList.add('show');
+
+            // Clear input
+            document.getElementById('qr-input').value = '';
+        }
+
+        // Show error message
+        function showError(message) {
+            const errorDiv = document.getElementById('errorMessage');
+            errorDiv.textContent = message;
+            errorDiv.classList.add('show');
+
+            // Hide error after 5 seconds
+            setTimeout(() => {
+                errorDiv.classList.remove('show');
+            }, 5000);
+        }
+
+        // Allow Enter key to scan
+        document.getElementById('qr-input').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                scanQRCode();
+            }
+        });
+
+        // Auto-focus input on page load
+        window.onload = () => {
+            document.getElementById('qr-input').focus();
+        };
+    </script>
+</body>
+</html>
