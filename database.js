@@ -222,6 +222,14 @@ class Database {
         );
     }
 
+    // Get patient by ID
+    async getPatientById(patientId) {
+        return await this.get(
+            'SELECT * FROM patients WHERE id = ?',
+            [patientId]
+        );
+    }
+
     // Generate token for department
     async generateToken(department) {
         const today = new Date().toISOString().split('T')[0];

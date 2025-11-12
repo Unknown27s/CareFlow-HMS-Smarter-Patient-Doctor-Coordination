@@ -1,8 +1,22 @@
 # Quick Start Guide
 
-## ✅ Setup Complete!
+## ✅ Latest Features - QR Code System
 
-All requested features have been implemented:
+All requested features have been implemented with the addition of a comprehensive QR code system:
+
+### 🆕 NEW: QR Code Features
+- ✅ **Automatic QR Code Generation**: Every patient registration generates a unique QR code
+- ✅ **Real-Time Clock Display**: QR scanner shows current date and time (updates every second)
+- ✅ **Patient Verification**: Scan QR codes to instantly verify patient information
+- ✅ **Timestamp Recording**: Each scan records the exact current date and time
+- ✅ **Visit History**: View patient visit history through QR scan
+
+### Core Features (Previously Implemented)
+- ✅ Logout Button - Functional
+- ✅ Admin Panel - Doctor Management
+- ✅ Department Auto-Assignment
+- ✅ Department-Based Patient Filtering
+- ✅ Real-time Connectivity
 
 ### 1. ✅ Logout Button - Functional
 - Added logout button to doctor dashboard
@@ -36,28 +50,45 @@ All requested features have been implemented:
 ## 🚀 How to Use
 
 ### Start Server
-```powershell
-cd "f:\Git floder\HMS3"
-node server.js
+```bash
+npm install
+npm start
 ```
-Server is currently running at: http://localhost:3000
+Server will start at: http://localhost:3000
 
 ### Access Points
 
-1. **Admin Panel**: http://localhost:3000/adminLogin.html
+1. **Home Page**: http://localhost:3000/index.html
+   - Links to all sections
+
+2. **Patient Registration**: http://localhost:3000/patient.html
+   - Register and receive QR code
+
+3. **QR Scanner**: http://localhost:3000/qrScanner.html
+   - Scan patient QR codes with real-time date/time display
+
+4. **Doctor Login**: http://localhost:3000/doctorLogin.html
+   - Login with credentials created by admin
+
+5. **Admin Panel**: http://localhost:3000/adminLogin.html
    - Username: `admin`
    - Password: `admin123`
 
-2. **Doctor Login**: http://localhost:3000/doctorLogin.html
-   - Login with credentials created by admin
-
-3. **Patient Registration**: http://localhost:3000/patient.html
-   - Patients can register and get token
-
-4. **Home Page**: http://localhost:3000/index.html
-   - Links to all sections
-
 ## 📋 Quick Test Workflow
+
+### 🆕 Test QR Code System
+```
+1. Register a Patient:
+   - Go to: http://localhost:3000/patient.html
+   - Fill in patient details
+   - Submit and save/screenshot the QR code displayed
+   
+2. Scan QR Code:
+   - Go to: http://localhost:3000/qrScanner.html
+   - Paste the QR code data (copy from registration)
+   - View patient info with REAL-TIME date and time
+   - Clock updates every second!
+```
 
 ### 1. Create a Doctor (as Admin)
 ```
@@ -106,28 +137,60 @@ Server is currently running at: http://localhost:3000
 
 ## 🔧 Technical Details
 
-### Files Created
+### 🆕 New Files Created (Latest Update)
+- `qrScanner.html` - QR code scanner with real-time clock
+- `.gitignore` - Proper build artifact exclusions
+- `.env.example` - Environment configuration template
+- `API_DOCUMENTATION.md` - Complete API documentation
+- `SETUP_GUIDE.md` - Comprehensive setup guide
+- `migrate.js` - Database backup/restore/migration tool
+- `test-qr.js` - QR functionality tests
+
+### Previously Created Files
 - `adminLogin.html` - Admin authentication page
 - `admin.html` - Doctor management panel
 - `ADMIN_SETUP_GUIDE.md` - Detailed documentation
 - `QUICK_START.md` - This file
 
-### Files Modified
+### Files Modified (Latest Update)
+- `server.js` - Added QR generation and scanning APIs
+- `database.js` - Added getPatientById method
+- `patient.html` - Display QR code after registration
+- `index.html` - Added QR Scanner link
+- `package.json` - Added migration scripts
+
+### Previously Modified
 - `server.js` - Added admin API routes + doctor login
 - `database.js` - Added bcrypt password hashing + admin methods
 - `doctorLogin.html` - Removed department field + server integration
 - `doctor.html` - Auto-filter by doctor's department
-- `index.html` - Added admin panel link
 
 ### Dependencies Added
-- `bcryptjs` - For password hashing (already in package.json)
+- `qrcode` - QR code generation library
+- `bcryptjs` - For password hashing
 
-### API Routes Added
+### 🆕 API Routes Added (Latest)
+```
+POST   /api/qr/generate        - Generate QR code for patient
+POST   /api/qr/scan            - Scan QR code with real-time timestamp
+POST   /api/register           - Now includes QR code in response
+```
+
+### Previously Added API Routes
 ```
 POST   /api/admin/doctors       - Create doctor
 GET    /api/admin/doctors       - List doctors
 DELETE /api/admin/doctors/:id   - Delete doctor
 POST   /api/doctor/login        - Doctor authentication
+```
+
+### 🆕 NPM Scripts Added
+```
+npm run backup  - Create database backup
+npm run restore - Restore from backup
+npm run health  - Check database health
+npm run export  - Export data to JSON
+npm run clean   - Clean old queue entries
 ```
 
 ## 🎯 Department Codes
@@ -154,15 +217,30 @@ POST   /api/doctor/login        - Doctor authentication
 
 ## 📊 Database
 
-Location: `f:\Git floder\HMS3\data\hospital.db`
+Location: `./data/hospital.db`
 
 ### Tables
 - `users` - Doctors, nurses, admin accounts
 - `patients` - Patient master data
-- `queue` - Daily queue entries
-- `appointments` - Future appointments (not used yet)
+- `queue` - Daily queue entries (with QR code data)
+- `appointments` - Future appointments
 - `languages` - Language support
 - `translations` - UI translations
+
+### 🆕 Database Management
+```bash
+# Create backup
+npm run backup
+
+# Check health
+npm run health
+
+# Export to JSON
+npm run export
+
+# Clean old entries
+npm run clean 7
+```
 
 ## 🌐 Network Access
 
@@ -177,6 +255,17 @@ Access from any device on same Wi-Fi network using these URLs.
 
 ## ✨ Features Working
 
+### 🆕 Latest Features (QR Code System)
+- [x] **QR Code Generation** - Automatic on registration
+- [x] **Real-Time Clock** - Updates every second in scanner
+- [x] **QR Code Scanner** - Verify patients instantly
+- [x] **Timestamp Recording** - Current date/time on every scan
+- [x] **Patient History** - View visit count and last visit
+- [x] **Database Backup/Restore** - Protect your data
+- [x] **Health Monitoring** - Check system statistics
+- [x] **Data Export** - Export to JSON format
+
+### Core Features
 - [x] Real-time patient registration
 - [x] WebSocket live updates
 - [x] Department-based patient filtering
