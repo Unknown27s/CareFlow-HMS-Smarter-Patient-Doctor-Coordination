@@ -245,6 +245,43 @@ app.put('/api/queue/:queueId/status', async (req, res) => {
     }
 });
 
+// Get queue status for specific token (patient view)
+app.get('/api/queue/status/:token', async (req, res) => {
+    try {
+        const { token } = req.params;
+
+        // Get patient queue data by token
+        const queueData = await db.getQueueByToken(token);
+
+        if (!queueData) {
+            return res.status(404).json({
+                success: false,
+                error: 'Token not found'
+            });
+        }
+
+        // Calculate how many people are waiting before this patient
+        const position = await db.getQueuePosition(token, queueData.department);
+
+        // Get total waiting in department
+        const departmentQueue = await db.getQueueByDepartment(queueData.department);
+        const totalWaiting = departmentQueue.filter(p => p.status === 'waiting').length;
+
+        res.json({
+            success: true,
+            token: queueData.token,
+            name: queueData.name,
+            department: queueData.department,
+            status: queueData.status,
+            position: position,
+            total_waiting: totalWaiting,
+            registered_at: queueData.registered_at
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
 // Get patient history
 app.get('/api/patient/:patientId/history', async (req, res) => {
     try {
@@ -457,7 +494,7 @@ app.post('/api/qr/scan', async (req, res) => {
 
         // Parse QR code data
         const patientData = JSON.parse(qrData);
-        
+
         // Add current scan timestamp
         const scanInfo = {
             ...patientData,

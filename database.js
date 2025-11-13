@@ -327,6 +327,30 @@ class Database {
         return result.position;
     }
 
+    // Get queue entry by token
+    async getQueueByToken(token) {
+        const today = new Date().toISOString().split('T')[0];
+
+        return await this.get(`
+            SELECT 
+                q.id,
+                q.token,
+                q.department,
+                q.status,
+                q.registered_at,
+                q.called_at,
+                q.completed_at,
+                p.name,
+                p.age,
+                p.gender,
+                p.contact
+            FROM queue q
+            JOIN patients p ON q.patient_id = p.id
+            WHERE q.token = ?
+            AND DATE(q.registered_at) = ?
+        `, [token, today]);
+    }
+
     // Update queue status
     async updateQueueStatus(queueId, status) {
         const timestamp = new Date().toISOString();

@@ -833,7 +833,8 @@
             <!-- QR Code Display -->
             <div class="qr-code-section" id="qrCodeSection" style="display: none; margin: 20px 0;">
                 <h3 style="color: #1976d2; margin-bottom: 15px;">Your QR Code</h3>
-                <div style="background: white; padding: 20px; border-radius: 15px; display: inline-block; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+                <div
+                    style="background: white; padding: 20px; border-radius: 15px; display: inline-block; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
                     <img id="qrCodeImage" src="" alt="Patient QR Code" style="max-width: 250px; height: auto;">
                 </div>
                 <p style="margin-top: 15px; color: #666; font-size: 0.95em;">
@@ -850,6 +851,11 @@
 
             <button class="btn-secondary" id="refreshBtn" onclick="checkQueueStatus()">
                 Refresh Queue Status
+            </button>
+
+            <button class="btn-secondary" id="viewLiveStatusBtn" onclick="viewLiveStatus()"
+                style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                👁️ View Live Queue Status
             </button>
 
             <div class="queue-status" id="queueStatus" style="display: none;">
@@ -930,6 +936,7 @@
                 tokenLabel: 'Your Token Number',
                 peopleBeforeLabel: 'People before you:',
                 refreshBtn: 'Refresh Queue Status',
+                viewLiveStatusBtn: '👁️ View Live Queue Status',
                 liveQueueHeading: 'Live Queue Updates',
                 registerAnotherBtn: 'Register Another Patient',
                 footerText: '© 2025 Hospital Queue Management System',
@@ -966,6 +973,7 @@
                 tokenLabel: 'உங்கள் டோக்கன் எண்',
                 peopleBeforeLabel: 'உங்களுக்கு முன்:',
                 refreshBtn: 'வரிசை நிலையைப் புதுப்பிக்கவும்',
+                viewLiveStatusBtn: '👁️ நேரடி வரிசை நிலையைக் காண்க',
                 liveQueueHeading: 'நேரலை வரிசை புதுப்பிப்புகள்',
                 registerAnotherBtn: 'மற்றொரு நோயாளியை பதிவு செய்க',
                 footerText: '© 2025 மருத்துவமனை வரிசை மேலாண்மை அமைப்பு',
@@ -1038,6 +1046,7 @@
             document.getElementById('tokenLabel').textContent = t.tokenLabel;
             document.getElementById('peopleBeforeLabel').textContent = t.peopleBeforeLabel;
             document.getElementById('refreshBtn').textContent = t.refreshBtn;
+            document.getElementById('viewLiveStatusBtn').textContent = t.viewLiveStatusBtn;
             document.getElementById('liveQueueHeading').textContent = t.liveQueueHeading;
             document.getElementById('registerAnotherBtn').textContent = t.registerAnotherBtn;
 
@@ -1221,6 +1230,13 @@
                 behavior: 'smooth',
                 block: 'start'
             });
+        }
+
+        function viewLiveStatus() {
+            if (currentToken) {
+                // Open queue status page with token
+                window.open(`queueStatus.html?token=${currentToken}`, '_blank');
+            }
         }
 
         // Initialize everything on page load
