@@ -76,6 +76,8 @@ const WebSocket = require('ws');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const path = require('path');
+const QRCode = require('qrcode');
+const fs = require('fs');
 const Database = require('./database');
 
 // Consolidated server: Express app + HTTP server + WebSocket
@@ -93,6 +95,12 @@ const db = new Database();
 
 // Store connected WebSocket clients
 const clients = new Set();
+
+// Create QR code directory if it doesn't exist
+const qrDir = path.join(__dirname, 'qr', 'generated');
+if (!fs.existsSync(qrDir)) {
+    fs.mkdirSync(qrDir, { recursive: true });
+}
 
 // WebSocket connection handler
 wss.on('connection', (ws) => {
@@ -156,10 +164,31 @@ app.post('/api/register', async (req, res) => {
 
         const position = await db.getQueuePosition(token, patientData.department);
 
+        // Generate QR code for the patient
+        const qrData = {
+            patientId: patientId,
+            name: patientData.name,
+            token: token,
+            contact: patientData.contact,
+            department: patientData.department,
+            timestamp: new Date().toISOString(),
+            registrationDate: new Date().toLocaleString('en-US', {
+                dateStyle: 'medium',
+                timeStyle: 'short'
+            })
+        };
+
+        const qrCodeDataURL = await QRCode.toDataURL(JSON.stringify(qrData), {
+            errorCorrectionLevel: 'M',
+            type: 'image/png',
+            width: 300,
+            margin: 2
+        });
+
         // Broadcast to WS clients (doctor dashboard should listen for this)
         broadcast({ type: 'NEW_REGISTRATION', data: { token, department: patientData.department, patientId, position, name: patientData.name } });
 
-        res.json({ success: true, token, position, patientId });
+        res.json({ success: true, token, position, patientId, qrCode: qrCodeDataURL, qrData });
     } catch (error) {
         console.error('Registration error:', error);
         res.status(500).json({ success: false, error: error.message });
@@ -211,6 +240,43 @@ app.put('/api/queue/:queueId/status', async (req, res) => {
         });
 
         res.json({ success: true });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// Get queue status for specific token (patient view)
+app.get('/api/queue/status/:token', async (req, res) => {
+    try {
+        const { token } = req.params;
+
+        // Get patient queue data by token
+        const queueData = await db.getQueueByToken(token);
+
+        if (!queueData) {
+            return res.status(404).json({
+                success: false,
+                error: 'Token not found'
+            });
+        }
+
+        // Calculate how many people are waiting before this patient
+        const position = await db.getQueuePosition(token, queueData.department);
+
+        // Get total waiting in department
+        const departmentQueue = await db.getQueueByDepartment(queueData.department);
+        const totalWaiting = departmentQueue.filter(p => p.status === 'waiting').length;
+
+        res.json({
+            success: true,
+            token: queueData.token,
+            name: queueData.name,
+            department: queueData.department,
+            status: queueData.status,
+            position: position,
+            total_waiting: totalWaiting,
+            registered_at: queueData.registered_at
+        });
     } catch (error) {
         res.status(500).json({ success: false, error: error.message });
     }
@@ -354,6 +420,113 @@ app.post('/api/admin/login', async (req, res) => {
     } catch (error) {
         console.error('Admin login error:', error);
         res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// ============================================
+// QR Code API Routes
+// ============================================
+
+// Generate QR code for patient
+app.post('/api/qr/generate', async (req, res) => {
+    try {
+        const { patientId, token } = req.body;
+
+        if (!patientId || !token) {
+            return res.status(400).json({
+                success: false,
+                error: 'Patient ID and token are required'
+            });
+        }
+
+        // Get patient info
+        const patient = await db.getPatientById(patientId);
+        if (!patient) {
+            return res.status(404).json({
+                success: false,
+                error: 'Patient not found'
+            });
+        }
+
+        // Create QR code data with timestamp
+        const qrData = {
+            patientId: patient.id,
+            name: patient.name,
+            token: token,
+            contact: patient.contact,
+            timestamp: new Date().toISOString(),
+            registrationDate: new Date().toLocaleString('en-US', {
+                dateStyle: 'medium',
+                timeStyle: 'short'
+            })
+        };
+
+        // Generate QR code as data URL
+        const qrCodeDataURL = await QRCode.toDataURL(JSON.stringify(qrData), {
+            errorCorrectionLevel: 'M',
+            type: 'image/png',
+            width: 300,
+            margin: 2
+        });
+
+        res.json({
+            success: true,
+            qrCode: qrCodeDataURL,
+            data: qrData
+        });
+    } catch (error) {
+        console.error('QR generation error:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// Scan/Decode QR code - returns patient info with current timestamp
+app.post('/api/qr/scan', async (req, res) => {
+    try {
+        const { qrData } = req.body;
+
+        if (!qrData) {
+            return res.status(400).json({
+                success: false,
+                error: 'QR data is required'
+            });
+        }
+
+        // Parse QR code data
+        const patientData = JSON.parse(qrData);
+
+        // Add current scan timestamp
+        const scanInfo = {
+            ...patientData,
+            scannedAt: new Date().toISOString(),
+            currentDateTime: new Date().toLocaleString('en-US', {
+                dateStyle: 'full',
+                timeStyle: 'long'
+            }),
+            currentDate: new Date().toLocaleDateString('en-US', { dateStyle: 'full' }),
+            currentTime: new Date().toLocaleTimeString('en-US', { timeStyle: 'medium' })
+        };
+
+        // Get latest patient info from database
+        const patient = await db.getPatientById(patientData.patientId);
+        if (patient) {
+            scanInfo.latestInfo = {
+                name: patient.name,
+                age: patient.age,
+                gender: patient.gender,
+                contact: patient.contact,
+                visitCount: patient.visit_count,
+                lastVisit: patient.last_visit
+            };
+        }
+
+        res.json({
+            success: true,
+            scanInfo
+        });
+    } catch (error) {
+        console.error('QR scan error:', error);
+        res.status(500).json({ success: false, error: 'Invalid QR code data' });
     }
 });
 

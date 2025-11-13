@@ -222,6 +222,14 @@ class Database {
         );
     }
 
+    // Get patient by ID
+    async getPatientById(patientId) {
+        return await this.get(
+            'SELECT * FROM patients WHERE id = ?',
+            [patientId]
+        );
+    }
+
     // Generate token for department
     async generateToken(department) {
         const today = new Date().toISOString().split('T')[0];
@@ -317,6 +325,30 @@ class Database {
         `, [department, token, today]);
 
         return result.position;
+    }
+
+    // Get queue entry by token
+    async getQueueByToken(token) {
+        const today = new Date().toISOString().split('T')[0];
+
+        return await this.get(`
+            SELECT 
+                q.id,
+                q.token,
+                q.department,
+                q.status,
+                q.registered_at,
+                q.called_at,
+                q.completed_at,
+                p.name,
+                p.age,
+                p.gender,
+                p.contact
+            FROM queue q
+            JOIN patients p ON q.patient_id = p.id
+            WHERE q.token = ?
+            AND DATE(q.registered_at) = ?
+        `, [token, today]);
     }
 
     // Update queue status
