@@ -282,6 +282,25 @@ app.get('/api/queue/status/:token', async (req, res) => {
     }
 });
 
+// Get queue position by token and department (for patient view)
+app.get('/api/queue/position/:token/:department', async (req, res) => {
+    try {
+        const { token, department } = req.params;
+
+        // Get queue position
+        const position = await db.getQueuePosition(token, department);
+
+        res.json({
+            success: true,
+            token: token,
+            department: department,
+            position: position
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
 // Get patient history
 app.get('/api/patient/:patientId/history', async (req, res) => {
     try {

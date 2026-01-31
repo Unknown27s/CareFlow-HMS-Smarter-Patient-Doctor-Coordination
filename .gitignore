@@ -27,6 +27,7 @@ data/*.db-journal
 # IDE
 .vscode/
 .idea/
+.vs/
 *.swp
 *.swo
 *~

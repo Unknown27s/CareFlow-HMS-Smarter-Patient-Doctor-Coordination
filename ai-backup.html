@@ -4,179 +4,39 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>MediBot AI Assistant - CareFlow HMS</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
-        rel="stylesheet">
-    <link rel="stylesheet" href="styles/theme.css">
+    <title>MediBot AI Assistant</title>
     <style>
+        /* ============================================
+           MEDIBOT CHATBOT WIDGET - PURE JS VERSION
+           ============================================ */
+
+        /* Base Styles & Font */
         body {
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 24px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f9fafb;
+            /* A light grey background for the demo page */
         }
 
-        .page-container {
-            max-width: 500px;
-            width: 100%;
-            text-align: center;
-        }
-
-        /* Back Link */
-        .back-link {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 10px 20px;
-            background: rgba(255, 255, 255, 0.2);
-            backdrop-filter: blur(10px);
-            color: white;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            border-radius: 10px;
-            font-weight: 500;
-            text-decoration: none;
-            transition: all 0.3s ease;
-            margin-bottom: 24px;
-        }
-
-        .back-link:hover {
-            background: rgba(255, 255, 255, 0.3);
-            transform: translateX(-4px);
-        }
-
-        /* Hero Section */
-        .hero-card {
-            background: var(--glass-bg);
-            backdrop-filter: blur(20px);
-            border: 1px solid var(--glass-border);
-            border-radius: 24px;
-            padding: 48px 40px;
-            box-shadow: var(--shadow-xl);
-            animation: fadeInUp 0.6s ease-out;
-        }
-
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .hero-icon {
-            width: 100px;
-            height: 100px;
-            background: var(--primary-gradient);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 48px;
-            margin: 0 auto 24px;
-            box-shadow: 0 8px 32px rgba(13, 148, 136, 0.3);
-        }
-
-        .hero-card h1 {
-            font-size: 2rem;
-            font-weight: 700;
-            color: var(--text-primary);
-            margin-bottom: 12px;
-        }
-
-        .hero-card p {
-            color: var(--text-secondary);
-            font-size: 1.1rem;
-            margin-bottom: 32px;
-        }
-
-        .features-list {
-            text-align: left;
-            background: linear-gradient(135deg, #f0fdfa 0%, #ccfbf1 100%);
-            border-radius: 16px;
-            padding: 24px;
-            margin-bottom: 32px;
-        }
-
-        .features-list h4 {
-            color: var(--primary);
-            font-size: 1rem;
-            margin-bottom: 16px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .features-list ul {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-
-        .features-list li {
-            color: var(--text-primary);
-            padding: 8px 0;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .features-list li::before {
-            content: "✓";
-            color: var(--primary);
-            font-weight: bold;
-        }
-
-        .cta-text {
-            color: var(--text-secondary);
-            font-size: 0.95rem;
-            margin-bottom: 8px;
-        }
-
-        .cta-arrow {
-            font-size: 2rem;
-            animation: bounce 2s infinite;
-        }
-
-        @keyframes bounce {
-
-            0%,
-            100% {
-                transform: translateY(0);
-            }
-
-            50% {
-                transform: translateY(10px);
-            }
-        }
-
-        /* MediBot Widget Styles */
         .medibot-widget * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
         }
 
+        /* Floating Action Button (FAB) */
         .medibot-fab {
             position: fixed;
             bottom: 24px;
             right: 24px;
-            width: 64px;
-            height: 64px;
-            background: var(--primary-gradient);
+            width: 56px;
+            height: 56px;
+            background: linear-gradient(135deg, #4f46e5, #7c3aed);
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            box-shadow: 0 8px 32px rgba(13, 148, 136, 0.4);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
             z-index: 10000;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             border: none;
@@ -184,14 +44,14 @@
 
         .medibot-fab:hover {
             transform: scale(1.1);
-            box-shadow: 0 10px 40px rgba(13, 148, 136, 0.5);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
         }
 
         .medibot-fab svg {
-            width: 30px;
-            height: 30px;
+            width: 28px;
+            height: 28px;
             fill: white;
-            transition: all 0.3s ease;
+            transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
             position: absolute;
         }
 
@@ -210,17 +70,18 @@
             transform: rotate(0deg);
         }
 
+        /* Chat Window */
         .medibot-window {
             position: fixed;
-            bottom: 100px;
+            bottom: 90px;
             right: 24px;
-            width: 420px;
-            max-width: calc(100vw - 48px);
+            width: 400px;
+            max-width: calc(100vw - 32px);
             height: 600px;
-            max-height: calc(100vh - 130px);
+            max-height: calc(100vh - 120px);
             background: white;
-            border-radius: 24px;
-            box-shadow: 0 24px 64px rgba(0, 0, 0, 0.2);
+            border-radius: 16px;
+            box-shadow: 0 12px 48px rgba(0, 0, 0, 0.25);
             display: flex;
             flex-direction: column;
             z-index: 9999;
@@ -237,28 +98,30 @@
             pointer-events: all;
         }
 
+        /* Header */
         .medibot-header {
-            background: var(--primary-gradient);
-            padding: 20px 24px;
+            background: linear-gradient(135deg, #4f46e5, #7c3aed);
+            padding: 20px;
             display: flex;
             align-items: center;
-            gap: 14px;
+            gap: 12px;
+            flex-shrink: 0;
         }
 
         .medibot-header-avatar {
-            width: 48px;
-            height: 48px;
-            background: rgba(255, 255, 255, 0.2);
+            width: 40px;
+            height: 40px;
+            background: white;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 24px;
+            font-size: 20px;
         }
 
         .medibot-header-info h3 {
             color: white;
-            font-size: 1.1rem;
+            font-size: 16px;
             font-weight: 600;
         }
 
@@ -266,8 +129,8 @@
             display: flex;
             align-items: center;
             gap: 6px;
-            font-size: 0.85rem;
-            color: rgba(255, 255, 255, 0.8);
+            font-size: 12px;
+            color: #ddd6fe;
         }
 
         .medibot-status-dot {
@@ -275,10 +138,10 @@
             height: 8px;
             background: #4ade80;
             border-radius: 50%;
-            animation: pulse 2s infinite;
+            animation: medibot-pulse 2s infinite;
         }
 
-        @keyframes pulse {
+        @keyframes medibot-pulse {
 
             0%,
             100% {
@@ -290,19 +153,32 @@
             }
         }
 
+        /* Messages Area */
         .medibot-messages {
             flex: 1;
-            padding: 24px;
+            padding: 20px;
             overflow-y: auto;
-            background: #f8fafc;
+            background: #f3f4f6;
         }
 
         .medibot-message {
             display: flex;
-            gap: 12px;
+            gap: 10px;
             margin-bottom: 16px;
             align-items: flex-end;
-            animation: fadeInUp 0.4s ease-out;
+            animation: medibot-fadeIn 0.4s ease-out;
+        }
+
+        @keyframes medibot-fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .medibot-message.user {
@@ -310,51 +186,55 @@
         }
 
         .medibot-message-avatar {
-            width: 36px;
-            height: 36px;
+            width: 32px;
+            height: 32px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 18px;
+            font-size: 16px;
             flex-shrink: 0;
         }
 
         .medibot-message.bot .medibot-message-avatar {
-            background: var(--primary-gradient);
+            background: linear-gradient(135deg, #4f46e5, #7c3aed);
             color: white;
         }
 
         .medibot-message.user .medibot-message-avatar {
             background: #e5e7eb;
+            color: #4b5563;
         }
 
         .medibot-message-bubble {
             max-width: 75%;
-            padding: 14px 18px;
+            padding: 12px 16px;
             border-radius: 18px;
-            font-size: 0.95rem;
-            line-height: 1.6;
+            font-size: 14px;
+            line-height: 1.5;
+            word-wrap: break-word;
         }
 
         .medibot-message.bot .medibot-message-bubble {
             background: white;
-            color: var(--text-primary);
+            color: #374151;
             border-bottom-left-radius: 4px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
         }
 
         .medibot-message.user .medibot-message-bubble {
-            background: var(--primary-gradient);
+            background: linear-gradient(135deg, #4f46e5, #7c3aed);
             color: white;
             border-bottom-right-radius: 4px;
         }
 
+        /* Typing Indicator */
         .medibot-typing-bubble {
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 4px;
+            height: 100%;
         }
 
         .medibot-typing-dot {
@@ -362,7 +242,7 @@
             height: 8px;
             background: #9ca3af;
             border-radius: 50%;
-            animation: typing 1.4s infinite ease-in-out;
+            animation: medibot-typing 1.4s infinite ease-in-out;
         }
 
         .medibot-typing-dot:nth-child(2) {
@@ -373,7 +253,7 @@
             animation-delay: 0.4s;
         }
 
-        @keyframes typing {
+        @keyframes medibot-typing {
 
             0%,
             60%,
@@ -386,58 +266,64 @@
             }
         }
 
+        /* Warning Banner */
         .medibot-warning {
             background: #fef3c7;
-            padding: 14px 18px;
-            font-size: 0.8rem;
+            padding: 12px 16px;
+            font-size: 11px;
             color: #92400e;
             display: flex;
-            gap: 10px;
+            gap: 8px;
             align-items: flex-start;
             border-top: 1px solid #fde68a;
-        }
-
-        .medibot-warning svg {
-            width: 16px;
-            height: 16px;
-            fill: #f59e0b;
             flex-shrink: 0;
         }
 
+        .medibot-warning svg {
+            width: 14px;
+            height: 14px;
+            fill: #f59e0b;
+            flex-shrink: 0;
+            margin-top: 1px;
+        }
+
+        /* Input Area */
         .medibot-input-area {
-            padding: 18px;
+            padding: 16px;
             background: white;
             border-top: 1px solid #e5e7eb;
             display: flex;
-            gap: 10px;
+            gap: 8px;
+            flex-shrink: 0;
         }
 
         .medibot-input {
             flex: 1;
-            padding: 14px 18px;
-            border: 2px solid #e5e7eb;
-            border-radius: 24px;
-            font-size: 0.95rem;
+            padding: 10px 16px;
+            border: 1px solid #d1d5db;
+            border-radius: 20px;
+            font-size: 14px;
             outline: none;
-            transition: all 0.3s ease;
+            transition: border-color 0.2s, box-shadow 0.2s;
         }
 
         .medibot-input:focus {
-            border-color: var(--primary);
-            box-shadow: 0 0 0 4px rgba(13, 148, 136, 0.1);
+            border-color: #4f46e5;
+            box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.2);
         }
 
         .medibot-send-btn {
-            width: 48px;
-            height: 48px;
-            background: var(--primary-gradient);
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #4f46e5, #7c3aed);
             border: none;
             border-radius: 50%;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: all 0.3s ease;
+            transition: transform 0.2s, opacity 0.2s;
+            flex-shrink: 0;
         }
 
         .medibot-send-btn:hover:not(:disabled) {
@@ -450,8 +336,8 @@
         }
 
         .medibot-send-btn svg {
-            width: 20px;
-            height: 20px;
+            width: 18px;
+            height: 18px;
             fill: white;
         }
 
@@ -466,21 +352,17 @@
                 bottom: 0;
                 border-radius: 0;
             }
-
-            .hero-card {
-                padding: 32px 24px;
-            }
-
-            .hero-card h1 {
-                font-size: 1.5rem;
-            }
         }
     </style>
 </head>
 
 <body>
-    <!-- MediBot Widget -->
+
+    <!-- ======================================
+         MEDIBOT WIDGET HTML STRUCTURE
+         ====================================== -->
     <div class="medibot-widget">
+        <!-- Floating Button -->
         <button class="medibot-fab" id="medibot-fab" aria-label="Toggle chat">
             <svg class="medibot-fab-icon-open" viewBox="0 0 24 24">
                 <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z" />
@@ -491,31 +373,38 @@
             </svg>
         </button>
 
+        <!-- Chat Window -->
         <div class="medibot-window" id="medibot-window">
+            <!-- Header -->
             <div class="medibot-header">
                 <div class="medibot-header-avatar">🩺</div>
                 <div class="medibot-header-info">
-                    <h3>MediBot AI Assistant</h3>
+                    <h3>MediBot Assistant</h3>
                     <div class="medibot-header-status">
                         <span class="medibot-status-dot"></span>
-                        <span>Powered by Gemini AI</span>
+                        <span>Online</span>
                     </div>
                 </div>
             </div>
 
-            <div class="medibot-messages" id="medibot-messages"></div>
+            <!-- Messages -->
+            <div class="medibot-messages" id="medibot-messages">
+                <!-- Initial bot message is now added dynamically via JS -->
+            </div>
 
+            <!-- Warning -->
             <div class="medibot-warning">
                 <svg viewBox="0 0 24 24">
                     <path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z" />
                 </svg>
                 <div><strong>Disclaimer:</strong> This AI provides informational guidance only. Always consult a
-                    certified doctor for diagnosis and treatment.</div>
+                    certified doctor for diagnosis.</div>
             </div>
 
+            <!-- Input -->
             <form class="medibot-input-area" id="medibot-form">
-                <input type="text" class="medibot-input" id="medibot-input"
-                    placeholder="Ask about symptoms, treatments, or hospital services..." autocomplete="off" />
+                <input type="text" class="medibot-input" id="medibot-input" placeholder="Type your medical question..."
+                    autocomplete="off" />
                 <button type="submit" class="medibot-send-btn" id="medibot-send">
                     <svg viewBox="0 0 24 24">
                         <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
@@ -525,70 +414,46 @@
         </div>
     </div>
 
-    <!-- Page Content -->
-    <div class="page-container">
-        <a href="index.html" class="back-link">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M19 12H5M12 19l-7-7 7-7" />
-            </svg>
-            Back to Home
-        </a>
-
-        <div class="hero-card">
-            <div class="hero-icon">🩺</div>
-            <h1>MediBot AI Assistant</h1>
-            <p>Your intelligent healthcare companion powered by advanced AI</p>
-
-            <div class="features-list">
-                <h4>💡 What MediBot Can Help With:</h4>
-                <ul>
-                    <li>Symptom analysis and general health queries</li>
-                    <li>Treatment information and medication guidance</li>
-                    <li>Hospital services and department information</li>
-                    <li>Appointment scheduling guidance</li>
-                    <li>Health tips and wellness advice</li>
-                </ul>
-            </div>
-
-            <p class="cta-text">Click the chat button to start a conversation</p>
-            <div class="cta-arrow">👇</div>
-        </div>
-    </div>
-
+    <!-- ======================================
+         MEDIBOT WIDGET JAVASCRIPT LOGIC
+         ====================================== -->
     <script type="module">
         import { GoogleGenAI } from "https://aistudiocdn.com/@google/genai@^1.28.0";
 
+        // --- CONFIGURATION ---
+
+        // PASTE YOUR GEMINI API KEY HERE
         const API_KEY = "AIzaSyCe_3sX0PA4dRh0r7s7UzWD-ys0YePULH4";
 
         const SYSTEM_PROMPT = `You are MediBot, an AI medical assistant in a hospital system. 
-    
-            STRICT RULES:
-            1. ONLY respond to medical/healthcare queries:
-               - Symptoms, diseases, conditions
-               - Treatments, medications, procedures
-               - Appointments, hospital services
-               - Doctor specializations, departments
-               - Medical tests, diagnostics
-               - Health and wellness advice
-    
-            2. For NON-MEDICAL queries, respond: "I'm MediBot, a medical assistant. I can only help with health-related questions. Please ask about symptoms, treatments, appointments, or hospital services."
-    
-            3. Always add the disclaimer: "This is general information. Please consult a healthcare professional for personalized medical advice." at the end of every medical response.
-    
-            4. For urgent symptoms (e.g., chest pain, severe bleeding, difficulty breathing, sudden weakness), immediately say: "This sounds urgent. Please seek immediate medical attention or call emergency services." and stop the conversation.
-    
-            5. Be empathetic, clear, and use simple language. Avoid overly technical jargon.
-    
-            6. Keep responses concise and helpful. Use formatting like bullet points (e.g., "* item") to improve readability.`;
 
-        const INITIAL_GREETING = `Hello! I'm MediBot, your AI medical assistant. 👋<br><br>
-                            I can help you with:<br>
-                            &bull; Symptom analysis<br>
-                            &bull; Treatment information<br>
-                            &bull; Appointment guidance<br>
-                            &bull; Hospital services<br><br>
-                            How can I assist you today?`;
+        STRICT RULES:
+        1. ONLY respond to medical/healthcare queries:
+           - Symptoms, diseases, conditions
+           - Treatments, medications, procedures
+           - Appointments, hospital services
+           - Doctor specializations, departments
+           - Medical tests, diagnostics
+           - Health and wellness advice
 
+        2. For NON-MEDICAL queries, respond: "I'm MediBot, a medical assistant. I can only help with health-related questions. Please ask about symptoms, treatments, appointments, or hospital services."
+
+        3. Always add the disclaimer: "This is general information. Please consult a healthcare professional for personalized medical advice." at the end of every medical response.
+
+        4. For urgent symptoms (e.g., chest pain, severe bleeding, difficulty breathing, sudden weakness), immediately say: "This sounds urgent. Please seek immediate medical attention or call emergency services." and stop the conversation.
+
+        5. Be empathetic, clear, and use simple language. Avoid overly technical jargon.
+
+        6. Keep responses concise and helpful. Use formatting like bullet points (e.g., "* item") to improve readability.`;
+
+        const INITIAL_GREETING = `Hello! I'm MediBot, your AI medical assistant. I can help you with:<br><br>
+                        &bull; Symptom analysis<br>
+                        &bull; Treatment information<br>
+                        &bull; Appointment guidance<br>
+                        &bull; Hospital services<br><br>
+                        How can I assist you today?`;
+
+        // --- DOM ELEMENTS ---
         const fab = document.getElementById('medibot-fab');
         const windowEl = document.getElementById('medibot-window');
         const messagesEl = document.getElementById('medibot-messages');
@@ -596,16 +461,20 @@
         const inputEl = document.getElementById('medibot-input');
         const sendBtn = document.getElementById('medibot-send');
 
+        // --- STATE ---
         let isOpen = false;
         let isLoading = false;
         let isInitialized = false;
         let chat = null;
 
+        // --- UI FUNCTIONS ---
         function toggleChat() {
             isOpen = !isOpen;
             windowEl.classList.toggle('active');
             fab.classList.toggle('active');
-            if (isOpen) inputEl.focus();
+            if (isOpen) {
+                inputEl.focus();
+            }
         }
 
         function scrollToBottom() {
@@ -620,9 +489,13 @@
 
         function formatMessageText(text) {
             let safeText = escapeHtml(text);
+            // Bold: **text** -> <strong>text</strong>
             safeText = safeText.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+            // Unordered lists: * item or - item -> &bull; item
             safeText = safeText.replace(/^\s*[\*-]\s+(.*)/gm, '&bull; $1');
+            // Newlines -> <br>
             safeText = safeText.replace(/\n/g, '<br />');
+            // Clean up extra breaks that might be created by the list conversion
             safeText = safeText.replace(/<br \/>&bull;/g, '&bull;');
             return safeText;
         }
@@ -630,11 +503,14 @@
         function addMessage(text, role, isFormatted = false) {
             const messageDiv = document.createElement('div');
             messageDiv.className = `medibot-message ${role}`;
+
             const avatar = role === 'bot' ? '🩺' : '👤';
             const messageContent = isFormatted ? text : formatMessageText(text);
+
             messageDiv.innerHTML = `
                 <div class="medibot-message-avatar">${avatar}</div>
                 <div class="medibot-message-bubble">${messageContent}</div>`;
+
             messagesEl.appendChild(messageDiv);
             scrollToBottom();
         }
@@ -665,9 +541,10 @@
             isLoading = loading;
             inputEl.disabled = loading;
             sendBtn.disabled = loading;
-            inputEl.placeholder = loading ? "MediBot is thinking..." : "Ask about symptoms, treatments, or hospital services...";
+            inputEl.placeholder = loading ? "MediBot is thinking..." : "Type your medical question...";
         }
 
+        // --- API & INITIALIZATION ---
         async function initializeApp() {
             if (!API_KEY || API_KEY === "YOUR_API_KEY_HERE") {
                 console.error("MediBot Error: API_KEY is not set.");
@@ -707,6 +584,7 @@
             }
         }
 
+        // --- EVENT HANDLERS ---
         async function handleFormSubmit(e) {
             e.preventDefault();
             const userText = inputEl.value.trim();
@@ -725,14 +603,11 @@
             inputEl.focus();
         }
 
+        // --- STARTUP ---
         fab.addEventListener('click', toggleChat);
         formEl.addEventListener('submit', handleFormSubmit);
         initializeApp();
 
-        // Auto-open chat after 2 seconds
-        setTimeout(() => {
-            if (!isOpen) toggleChat();
-        }, 2000);
     </script>
 </body>
 

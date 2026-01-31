@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Queue Status - People Before You</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 500px;
+            width: 100%;
+        }
+
+        /* Language Toggle */
+        .language-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+
+        .lang-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 10px 20px;
+            border: 2px solid white;
+            border-radius: 25px;
+            font-size: 0.9em;
+            font-weight: 600;
+            cursor: pointer;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .lang-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        /* Main Card */
+        .status-card {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            animation: slideUp 0.6s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Token Input Section */
+        .input-section {
+            margin-bottom: 30px;
+        }
+
+        .input-section h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+
+        .token-input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .token-input {
+            flex: 1;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1.1em;
+            text-transform: uppercase;
+            transition: all 0.3s ease;
+        }
+
+        .token-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .check-btn {
+            padding: 15px 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .check-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .check-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        /* Status Display */
+        .status-display {
+            display: none;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .status-display.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        .token-badge {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 30px;
+            border-radius: 15px;
+            font-size: 1.8em;
+            font-weight: bold;
+            margin-bottom: 30px;
+            display: inline-block;
+        }
+
+        /* People Before You Counter */
+        .people-counter {
+            background: #f8f9fa;
+            padding: 40px;
+            border-radius: 15px;
+            margin: 30px 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .people-counter::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .counter-label {
+            font-size: 1.1em;
+            color: #666;
+            margin-bottom: 15px;
+        }
+
+        .counter-number {
+            font-size: 4em;
+            font-weight: bold;
+            color: #667eea;
+            margin: 20px 0;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.05);
+            }
+        }
+
+        .status-message {
+            font-size: 1.2em;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+
+        .status-message.waiting {
+            background: #fff3cd;
+            color: #856404;
+            border: 2px solid #ffeaa7;
+        }
+
+        .status-message.next {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 2px solid #bee5eb;
+        }
+
+        .status-message.ready {
+            background: #d4edda;
+            color: #155724;
+            border: 2px solid #c3e6cb;
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.7;
+            }
+        }
+
+        /* Patient Info */
+        .patient-info {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            text-align: left;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .info-row:last-child {
+            border-bottom: none;
+        }
+
+        .info-label {
+            font-weight: 600;
+            color: #666;
+        }
+
+        .info-value {
+            color: #333;
+        }
+
+        /* Live Update Indicator */
+        .live-indicator {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin: 20px 0;
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .live-dot {
+            width: 10px;
+            height: 10px;
+            background: #4caf50;
+            border-radius: 50%;
+            animation: livePulse 2s infinite;
+        }
+
+        @keyframes livePulse {
+
+            0%,
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+
+            50% {
+                opacity: 0.5;
+                transform: scale(1.2);
+            }
+        }
+
+        /* Progress Bar */
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            transition: width 0.5s ease;
+            border-radius: 10px;
+        }
+
+        /* Error Message */
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            display: none;
+        }
+
+        .error-message.active {
+            display: block;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .status-card {
+                padding: 30px 20px;
+            }
+
+            .counter-number {
+                font-size: 3em;
+            }
+
+            .token-badge {
+                font-size: 1.4em;
+                padding: 12px 24px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Language Toggle -->
+    <div class="language-toggle">
+        <button class="lang-btn" id="langToggle" onclick="toggleLanguage()">
+            <span id="langBtnText">தமிழ்</span>
+        </button>
+    </div>
+
+    <div class="container">
+        <div class="status-card">
+            <!-- Token Input Section -->
+            <div class="input-section" id="inputSection">
+                <h2 id="inputHeading">Enter Your Token Number</h2>
+                <div class="token-input-group">
+                    <input type="text" id="tokenInput" class="token-input" placeholder="e.g., GEN001" maxlength="10">
+                    <button class="check-btn" id="checkBtn" onclick="checkStatus()">
+                        <span id="checkBtnText">Check</span>
+                    </button>
+                </div>
+                <p id="inputHelp" style="color: #666; font-size: 0.9em;">Enter the token number you received during
+                    registration</p>
+            </div>
+
+            <!-- Error Message -->
+            <div class="error-message" id="errorMessage"></div>
+
+            <!-- Status Display Section -->
+            <div class="status-display" id="statusDisplay">
+                <div class="token-badge" id="tokenBadge">GEN001</div>
+
+                <!-- Live Indicator -->
+                <div class="live-indicator">
+                    <div class="live-dot"></div>
+                    <span id="liveText">Live Updates</span>
+                </div>
+
+                <!-- People Before You Counter -->
+                <div class="people-counter">
+                    <div class="counter-label" id="counterLabel">People Before You</div>
+                    <div class="counter-number" id="counterNumber">0</div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                </div>
+
+                <!-- Status Message -->
+                <div class="status-message waiting" id="statusMessage">
+                    Please wait for your turn...
+                </div>
+
+                <!-- Patient Info -->
+                <div class="patient-info" id="patientInfo">
+                    <div class="info-row">
+                        <span class="info-label" id="nameLabel">Name:</span>
+                        <span class="info-value" id="patientName">-</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label" id="deptLabel">Department:</span>
+                        <span class="info-value" id="patientDept">-</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label" id="statusLabel">Status:</span>
+                        <span class="info-value" id="patientStatus">-</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label" id="timeLabel">Waiting Time:</span>
+                        <span class="info-value" id="waitingTime">-</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ═══════════════════════════════════════════════════════════════
+        // MULTI-LANGUAGE SUPPORT
+        // ═══════════════════════════════════════════════════════════════
+
+        const translations = {
+            en: {
+                langBtn: 'தமிழ்',
+                inputHeading: 'Enter Your Token Number',
+                inputHelp: 'Enter the token number you received during registration',
+                checkBtnText: 'Check',
+                liveText: 'Live Updates',
+                counterLabel: 'People Before You',
+                nameLabel: 'Name:',
+                deptLabel: 'Department:',
+                statusLabel: 'Status:',
+                timeLabel: 'Waiting Time:',
+                statusWaiting: 'Please wait for your turn...',
+                statusNext: '🎯 You\'re next! Please be ready.',
+                statusReady: '✅ It\'s your turn! Please proceed to the consultation room.',
+                errorNotFound: 'Token not found. Please check your token number.',
+                errorServer: 'Unable to connect to server. Please try again.',
+                statusInProgress: 'In Progress',
+                statusCompleted: 'Completed',
+                statusCancelled: 'Cancelled'
+            },
+            ta: {
+                langBtn: 'English',
+                inputHeading: 'உங்கள் டோக்கன் எண்ணை உள்ளிடவும்',
+                inputHelp: 'பதிவின் போது நீங்கள் பெற்ற டோக்கன் எண்ணை உள்ளிடவும்',
+                checkBtnText: 'சரிபார்க்கவும்',
+                liveText: 'நேரடி புதுப்பிப்புகள்',
+                counterLabel: 'உங்களுக்கு முன் உள்ளவர்கள்',
+                nameLabel: 'பெயர்:',
+                deptLabel: 'துறை:',
+                statusLabel: 'நிலை:',
+                timeLabel: 'காத்திருப்பு நேரம்:',
+                statusWaiting: 'தயவுசெய்து உங்கள் முறைக்காக காத்திருக்கவும்...',
+                statusNext: '🎯 நீங்கள் அடுத்தவர்! தயவாக தயாராக இருங்கள்.',
+                statusReady: '✅ உங்கள் முறை! தயவுசெய்து ஆலோசனை அறைக்கு செல்லவும்.',
+                errorNotFound: 'டோக்கன் கிடைக்கவில்லை. உங்கள் டோக்கன் எண்ணை சரிபார்க்கவும்.',
+                errorServer: 'சர்வரை தொடர முடியவில்லை. மீண்டும் முயற்சிக்கவும்.',
+                statusInProgress: 'முன்னேற்றத்தில்',
+                statusCompleted: 'முடிந்தது',
+                statusCancelled: 'ரத்து செய்யப்பட்டது'
+            }
+        };
+
+        let currentLang = 'en';
+        let currentToken = '';
+        let ws = null;
+        let autoRefreshInterval = null;
+        let registeredTime = null;
+
+        // Initialize language
+        function initializeLanguage() {
+            const savedLang = localStorage.getItem('preferredLanguage');
+            if (savedLang && translations[savedLang]) {
+                currentLang = savedLang;
+                applyLanguage(currentLang);
+            }
+        }
+
+        // Toggle language
+        function toggleLanguage() {
+            currentLang = currentLang === 'en' ? 'ta' : 'en';
+            localStorage.setItem('preferredLanguage', currentLang);
+            applyLanguage(currentLang);
+        }
+
+        // Apply language
+        function applyLanguage(lang) {
+            const t = translations[lang];
+            document.getElementById('langBtnText').textContent = t.langBtn;
+            document.getElementById('inputHeading').textContent = t.inputHeading;
+            document.getElementById('inputHelp').textContent = t.inputHelp;
+            document.getElementById('checkBtnText').textContent = t.checkBtnText;
+            document.getElementById('liveText').textContent = t.liveText;
+            document.getElementById('counterLabel').textContent = t.counterLabel;
+            document.getElementById('nameLabel').textContent = t.nameLabel;
+            document.getElementById('deptLabel').textContent = t.deptLabel;
+            document.getElementById('statusLabel').textContent = t.statusLabel;
+            document.getElementById('timeLabel').textContent = t.timeLabel;
+
+            document.getElementById('tokenInput').placeholder = lang === 'en' ? 'e.g., GEN001' : 'உதா., GEN001';
+        }
+
+        // ═══════════════════════════════════════════════════════════════
+        // WEBSOCKET CONNECTION
+        // ═══════════════════════════════════════════════════════════════
+
+        function connectWebSocket() {
+            ws = new WebSocket('ws://localhost:3000');
+
+            ws.onopen = () => {
+                console.log('WebSocket connected');
+            };
+
+            ws.onmessage = (event) => {
+                const data = JSON.parse(event.data);
+                if (data.type === 'queueUpdate' || data.type === 'statusUpdate') {
+                    // Refresh status when queue updates
+                    if (currentToken) {
+                        fetchQueueStatus(currentToken, false);
+                    }
+                }
+            };
+
+            ws.onerror = (error) => {
+                console.error('WebSocket error:', error);
+            };
+
+            ws.onclose = () => {
+                console.log('WebSocket disconnected. Reconnecting...');
+                setTimeout(connectWebSocket, 3000);
+            };
+        }
+
+        // ═══════════════════════════════════════════════════════════════
+        // QUEUE STATUS FUNCTIONS
+        // ═══════════════════════════════════════════════════════════════
+
+        async function checkStatus() {
+            const token = document.getElementById('tokenInput').value.trim().toUpperCase();
+
+            if (!token) {
+                showError(currentLang === 'en' ? 'Please enter a token number' : 'தயவுசெய்து டோக்கன் எண்ணை உள்ளிடவும்');
+                return;
+            }
+
+            await fetchQueueStatus(token, true);
+        }
+
+        async function fetchQueueStatus(token, isInitial = false) {
+            try {
+                const response = await fetch(`http://localhost:3000/api/queue/status/${token}`);
+
+                if (!response.ok) {
+                    if (response.status === 404) {
+                        showError(translations[currentLang].errorNotFound);
+                        return;
+                    }
+                    throw new Error('Failed to fetch status');
+                }
+
+                const data = await response.json();
+                currentToken = token;
+
+                if (isInitial) {
+                    registeredTime = new Date(data.registered_at);
+                    document.getElementById('inputSection').style.display = 'none';
+                    document.getElementById('statusDisplay').classList.add('active');
+                    startAutoRefresh();
+                }
+
+                updateStatusDisplay(data);
+                hideError();
+
+            } catch (error) {
+                console.error('Error fetching queue status:', error);
+                showError(translations[currentLang].errorServer);
+            }
+        }
+
+        function updateStatusDisplay(data) {
+            const t = translations[currentLang];
+
+            // Update token badge
+            document.getElementById('tokenBadge').textContent = data.token;
+
+            // Calculate people before you
+            const peopleBeforeYou = data.position;
+            document.getElementById('counterNumber').textContent = peopleBeforeYou;
+
+            // Update progress bar (inverse - closer to 0 means more progress)
+            const totalInQueue = data.total_waiting || 10;
+            const progress = Math.max(0, ((totalInQueue - peopleBeforeYou) / totalInQueue) * 100);
+            document.getElementById('progressFill').style.width = progress + '%';
+
+            // Update status message
+            const statusMsgDiv = document.getElementById('statusMessage');
+            statusMsgDiv.className = 'status-message';
+
+            if (data.status === 'in_progress') {
+                statusMsgDiv.textContent = t.statusReady;
+                statusMsgDiv.classList.add('ready');
+            } else if (peopleBeforeYou === 0) {
+                statusMsgDiv.textContent = t.statusNext;
+                statusMsgDiv.classList.add('next');
+            } else {
+                statusMsgDiv.textContent = t.statusWaiting;
+                statusMsgDiv.classList.add('waiting');
+            }
+
+            // Update patient info
+            document.getElementById('patientName').textContent = data.name || '-';
+            document.getElementById('patientDept').textContent = getDepartmentName(data.department);
+
+            const statusText = data.status === 'waiting' ? (currentLang === 'en' ? 'Waiting' : 'காத்திருக்கிறது') :
+                data.status === 'in_progress' ? t.statusInProgress :
+                    data.status === 'completed' ? t.statusCompleted :
+                        data.status === 'cancelled' ? t.statusCancelled : data.status;
+            document.getElementById('patientStatus').textContent = statusText;
+
+            // Update waiting time
+            if (registeredTime) {
+                const waitTime = calculateWaitingTime(registeredTime);
+                document.getElementById('waitingTime').textContent = waitTime;
+            }
+        }
+
+        function getDepartmentName(dept) {
+            const deptNames = {
+                en: {
+                    GEN: 'General Medicine',
+                    ENT: 'ENT',
+                    CAR: 'Cardiology',
+                    ORT: 'Orthopedics',
+                    PED: 'Pediatrics',
+                    DER: 'Dermatology',
+                    NEU: 'Neurology'
+                },
+                ta: {
+                    GEN: 'பொது மருத்துவம்',
+                    ENT: 'காது மூக்கு தொண்டை',
+                    CAR: 'இதய மருத்துவம்',
+                    ORT: 'எலும்பியல்',
+                    PED: 'குழந்தை மருத்துவம்',
+                    DER: 'தோல் மருத்துவம்',
+                    NEU: 'நரம்பியல்'
+                }
+            };
+            return deptNames[currentLang][dept] || dept;
+        }
+
+        function calculateWaitingTime(startTime) {
+            const now = new Date();
+            const diff = now - startTime;
+            const hours = Math.floor(diff / (1000 * 60 * 60));
+            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+
+            if (currentLang === 'en') {
+                return hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`;
+            } else {
+                return hours > 0 ? `${hours}ம ${minutes}நி` : `${minutes}நி`;
+            }
+        }
+
+        function showError(message) {
+            const errorDiv = document.getElementById('errorMessage');
+            errorDiv.textContent = message;
+            errorDiv.classList.add('active');
+        }
+
+        function hideError() {
+            document.getElementById('errorMessage').classList.remove('active');
+        }
+
+        function startAutoRefresh() {
+            if (autoRefreshInterval) {
+                clearInterval(autoRefreshInterval);
+            }
+            // Update waiting time every 30 seconds
+            autoRefreshInterval = setInterval(() => {
+                if (currentToken) {
+                    fetchQueueStatus(currentToken, false);
+                }
+            }, 30000);
+        }
+
+        // ═══════════════════════════════════════════════════════════════
+        // INITIALIZATION
+        // ═══════════════════════════════════════════════════════════════
+
+        window.onload = function () {
+            initializeLanguage();
+            connectWebSocket();
+
+            // Allow Enter key to check status
+            document.getElementById('tokenInput').addEventListener('keypress', function (e) {
+                if (e.key === 'Enter') {
+                    checkStatus();
+                }
+            });
+
+            // Auto-fill token from URL parameter if present
+            const urlParams = new URLSearchParams(window.location.search);
+            const tokenParam = urlParams.get('token');
+            if (tokenParam) {
+                document.getElementById('tokenInput').value = tokenParam;
+                checkStatus();
+            }
+        };
+
+        window.onbeforeunload = function () {
+            if (autoRefreshInterval) {
+                clearInterval(autoRefreshInterval);
+            }
+            if (ws) {
+                ws.close();
+            }
+        };
+    </script>
+</body>
+
+</html>

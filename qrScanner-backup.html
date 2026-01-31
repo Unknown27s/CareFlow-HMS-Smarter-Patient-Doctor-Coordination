@@ -1,219 +1,124 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QR Scanner - CareFlow HMS</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
-        rel="stylesheet">
-    <link rel="stylesheet" href="styles/theme.css">
+    <title>QR Code Scanner - Patient Check-in</title>
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            padding: 24px;
+            padding: 20px;
         }
 
         .container {
-            background: var(--glass-bg);
-            backdrop-filter: blur(20px);
-            border: 1px solid var(--glass-border);
-            border-radius: 24px;
-            box-shadow: var(--shadow-xl);
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
             max-width: 800px;
             width: 100%;
             overflow: hidden;
-            animation: fadeInUp 0.6s ease-out;
         }
 
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        /* Header */
         .header {
-            background: var(--primary-gradient);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-            padding: 32px;
+            padding: 30px;
             text-align: center;
         }
 
         .header h1 {
-            font-size: 2rem;
-            font-weight: 700;
-            margin-bottom: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-        }
-
-        .header p {
-            opacity: 0.9;
-            font-size: 1rem;
+            font-size: 2em;
+            margin-bottom: 10px;
         }
 
         .datetime-display {
-            background: rgba(255, 255, 255, 0.15);
-            backdrop-filter: blur(10px);
-            padding: 16px 24px;
-            border-radius: 12px;
-            margin-top: 20px;
-            display: inline-block;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 15px;
         }
 
         .datetime-display .date {
-            font-size: 1rem;
-            font-weight: 500;
-            opacity: 0.9;
+            font-size: 1.2em;
+            font-weight: 600;
         }
 
         .datetime-display .time {
-            font-size: 2rem;
-            font-weight: 700;
-            margin-top: 4px;
-            font-family: 'SF Mono', 'Consolas', monospace;
-            letter-spacing: 2px;
+            font-size: 2em;
+            font-weight: bold;
+            margin-top: 5px;
+            font-family: 'Courier New', monospace;
         }
 
-        /* Content */
         .content {
             padding: 40px;
         }
 
-        .back-link {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 10px 18px;
-            background: rgba(13, 148, 136, 0.1);
-            color: var(--primary);
-            border: 1px solid rgba(13, 148, 136, 0.2);
-            border-radius: 10px;
-            font-weight: 500;
-            text-decoration: none;
-            transition: all 0.3s ease;
-            margin-bottom: 24px;
-        }
-
-        .back-link:hover {
-            background: rgba(13, 148, 136, 0.15);
-            transform: translateX(-4px);
-        }
-
-        /* Instructions */
-        .instructions {
-            background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
-            padding: 24px;
-            border-radius: 16px;
-            margin-bottom: 28px;
-            border: 2px solid #a7f3d0;
-        }
-
-        .instructions h4 {
-            color: #065f46;
-            font-size: 1.1rem;
-            margin-bottom: 12px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .instructions ul {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-
-        .instructions li {
-            color: #047857;
-            margin: 8px 0;
-            padding-left: 24px;
-            position: relative;
-        }
-
-        .instructions li::before {
-            content: "✓";
-            position: absolute;
-            left: 0;
-            color: #10b981;
-            font-weight: bold;
-        }
-
-        /* Scanner Section */
         .scanner-section {
             text-align: center;
-            margin-bottom: 28px;
+            margin-bottom: 30px;
         }
 
-        .qr-input {
+        #qr-input {
             width: 100%;
-            padding: 18px 24px;
-            font-size: 1.1rem;
-            border: 2px solid var(--glass-border);
-            border-radius: 14px;
-            margin-bottom: 16px;
-            transition: all 0.3s ease;
-            background: white;
-            color: var(--text-primary);
+            padding: 15px;
+            font-size: 1.1em;
+            border: 2px solid #667eea;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            transition: all 0.3s;
         }
 
-        .qr-input:focus {
+        #qr-input:focus {
             outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 4px rgba(13, 148, 136, 0.1);
+            border-color: #764ba2;
+            box-shadow: 0 0 0 3px rgba(118, 75, 162, 0.1);
         }
 
-        .btn-scan {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            width: 100%;
-            padding: 18px 32px;
-            background: var(--primary-gradient);
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
+            padding: 15px 40px;
             border: none;
-            border-radius: 14px;
-            font-size: 1.1rem;
-            font-weight: 600;
+            border-radius: 10px;
+            font-size: 1.1em;
             cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 16px rgba(13, 148, 136, 0.3);
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
         }
 
-        .btn-scan:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 24px rgba(13, 148, 136, 0.4);
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
         }
 
-        .btn-scan:active {
-            transform: translateY(-1px);
+        .btn:active {
+            transform: translateY(0);
         }
 
-        /* Result Section */
         .result-section {
             display: none;
-            margin-top: 28px;
-            padding: 28px;
-            background: white;
-            border-radius: 16px;
-            border-left: 5px solid var(--primary);
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
-            animation: slideIn 0.4s ease-out;
+            margin-top: 30px;
+            padding: 25px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+        }
+
+        .result-section.show {
+            display: block;
+            animation: slideIn 0.3s ease-out;
         }
 
         @keyframes slideIn {
@@ -221,120 +126,118 @@
                 opacity: 0;
                 transform: translateY(-10px);
             }
-
             to {
                 opacity: 1;
                 transform: translateY(0);
             }
         }
 
-        .result-section.show {
-            display: block;
-        }
-
         .result-section h3 {
-            color: var(--primary);
-            font-size: 1.25rem;
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.5em;
         }
 
         .patient-info {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 16px;
+            gap: 15px;
+            margin-top: 20px;
         }
 
         .info-item {
-            background: #f8fafc;
-            padding: 16px;
-            border-radius: 12px;
-            border: 1px solid #e2e8f0;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
         }
 
         .info-label {
-            font-size: 0.8rem;
-            color: var(--text-secondary);
+            font-size: 0.85em;
+            color: #666;
             text-transform: uppercase;
             letter-spacing: 0.5px;
-            font-weight: 600;
         }
 
         .info-value {
-            font-size: 1.15rem;
-            color: var(--text-primary);
+            font-size: 1.2em;
+            color: #333;
             font-weight: 600;
-            margin-top: 6px;
+            margin-top: 5px;
         }
 
         .scan-timestamp {
-            background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
-            padding: 20px;
-            border-radius: 12px;
-            margin-top: 20px;
+            background: #e8f5e9;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
             text-align: center;
-            border: 2px solid #a7f3d0;
         }
 
         .scan-timestamp .label {
-            font-size: 0.9rem;
-            color: #047857;
-            font-weight: 500;
-            margin-bottom: 4px;
+            font-size: 0.9em;
+            color: #2e7d32;
+            margin-bottom: 5px;
         }
 
         .scan-timestamp .value {
-            font-size: 1.25rem;
-            color: #065f46;
-            font-weight: 700;
+            font-size: 1.3em;
+            color: #1b5e20;
+            font-weight: bold;
         }
 
-        /* Error Message */
         .error-message {
-            background: #fef2f2;
-            color: #991b1b;
-            padding: 16px;
-            border-radius: 12px;
-            margin-top: 20px;
+            background: #ffebee;
+            color: #c62828;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
             display: none;
-            border: 2px solid #fecaca;
-            animation: shake 0.5s;
         }
 
         .error-message.show {
             display: block;
+            animation: shake 0.5s;
         }
 
         @keyframes shake {
-
-            0%,
-            100% {
-                transform: translateX(0);
-            }
-
-            25% {
-                transform: translateX(-10px);
-            }
-
-            75% {
-                transform: translateX(10px);
-            }
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
         }
 
-        /* Responsive */
+        .instructions {
+            background: #e3f2fd;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+        }
+
+        .instructions h4 {
+            color: #1565c0;
+            margin-bottom: 10px;
+        }
+
+        .instructions ul {
+            list-style-position: inside;
+            color: #1976d2;
+        }
+
+        .instructions li {
+            margin: 5px 0;
+        }
+
         @media (max-width: 600px) {
             .header h1 {
-                font-size: 1.5rem;
+                font-size: 1.5em;
             }
 
             .datetime-display .time {
-                font-size: 1.5rem;
+                font-size: 1.5em;
             }
 
             .content {
-                padding: 24px;
+                padding: 20px;
             }
 
             .patient-info {
@@ -343,14 +246,10 @@
         }
     </style>
 </head>
-
 <body>
     <div class="container">
         <div class="header">
-            <h1>
-                <span>📱</span>
-                QR Code Scanner
-            </h1>
+            <h1>🏥 QR Code Scanner</h1>
             <p>Patient Check-in System</p>
             <div class="datetime-display">
                 <div class="date" id="currentDate">Loading...</div>
@@ -359,13 +258,6 @@
         </div>
 
         <div class="content">
-            <a href="index.html" class="back-link">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M19 12H5M12 19l-7-7 7-7" />
-                </svg>
-                Back to Home
-            </a>
-
             <div class="instructions">
                 <h4>📋 How to Use:</h4>
                 <ul>
@@ -377,19 +269,20 @@
             </div>
 
             <div class="scanner-section">
-                <input type="text" id="qr-input" class="qr-input" placeholder="Paste QR code data here or scan..."
-                    autocomplete="off">
-                <button class="btn-scan" onclick="scanQRCode()">
-                    <span>🔍</span>
-                    Scan QR Code
-                </button>
+                <input 
+                    type="text" 
+                    id="qr-input" 
+                    placeholder="Paste QR code data here or scan..."
+                    autocomplete="off"
+                >
+                <button class="btn" onclick="scanQRCode()">🔍 Scan QR Code</button>
             </div>
 
             <div class="error-message" id="errorMessage"></div>
 
             <div class="result-section" id="resultSection">
                 <h3>✅ Patient Information</h3>
-
+                
                 <div class="patient-info" id="patientInfo">
                     <!-- Patient info will be displayed here -->
                 </div>
@@ -406,28 +299,29 @@
         // Real-time clock update
         function updateClock() {
             const now = new Date();
-
-            const dateOptions = {
-                weekday: 'long',
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric'
+            
+            const dateOptions = { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
             };
             const dateStr = now.toLocaleDateString('en-US', dateOptions);
-
-            const timeStr = now.toLocaleTimeString('en-US', {
+            
+            const timeStr = now.toLocaleTimeString('en-US', { 
                 hour12: true,
                 hour: '2-digit',
                 minute: '2-digit',
                 second: '2-digit'
             });
-
+            
             document.getElementById('currentDate').textContent = dateStr;
             document.getElementById('currentTime').textContent = timeStr;
         }
 
+        // Update clock every second
         setInterval(updateClock, 1000);
-        updateClock();
+        updateClock(); // Initial call
 
         // Scan QR Code function
         async function scanQRCode() {
@@ -436,6 +330,7 @@
             const errorMessage = document.getElementById('errorMessage');
             const resultSection = document.getElementById('resultSection');
 
+            // Hide previous results
             errorMessage.classList.remove('show');
             resultSection.classList.remove('show');
 
@@ -445,9 +340,12 @@
             }
 
             try {
+                // Call API to scan/decode QR code
                 const response = await fetch('/api/qr/scan', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
                     body: JSON.stringify({ qrData })
                 });
 
@@ -464,11 +362,13 @@
             }
         }
 
+        // Display patient information
         function displayPatientInfo(scanInfo) {
             const patientInfoDiv = document.getElementById('patientInfo');
             const scanTimestampDiv = document.getElementById('scanTimestamp');
             const resultSection = document.getElementById('resultSection');
 
+            // Build patient info HTML
             let infoHTML = `
                 <div class="info-item">
                     <div class="info-label">Patient Name</div>
@@ -509,27 +409,33 @@
             scanTimestampDiv.textContent = scanInfo.currentDateTime;
             resultSection.classList.add('show');
 
+            // Clear input
             document.getElementById('qr-input').value = '';
         }
 
+        // Show error message
         function showError(message) {
             const errorDiv = document.getElementById('errorMessage');
             errorDiv.textContent = message;
             errorDiv.classList.add('show');
 
+            // Hide error after 5 seconds
             setTimeout(() => {
                 errorDiv.classList.remove('show');
             }, 5000);
         }
 
+        // Allow Enter key to scan
         document.getElementById('qr-input').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') scanQRCode();
+            if (e.key === 'Enter') {
+                scanQRCode();
+            }
         });
 
+        // Auto-focus input on page load
         window.onload = () => {
             document.getElementById('qr-input').focus();
         };
     </script>
 </body>
-
 </html>
