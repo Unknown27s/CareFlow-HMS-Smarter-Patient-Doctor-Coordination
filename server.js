@@ -78,7 +78,7 @@ const bodyParser = require('body-parser');
 const path = require('path');
 const QRCode = require('qrcode');
 const fs = require('fs');
-const Database = require('./database');
+const Database = require('./database-new');
 
 // Consolidated server: Express app + HTTP server + WebSocket
 const app = express();
@@ -91,7 +91,12 @@ app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname)));
 
 // Initialize database
-const db = new Database();
+let db;
+const dbPromise = (async () => {
+    db = new Database();
+    await db.initializeDatabase();
+    return db;
+})();
 
 // Store connected WebSocket clients
 const clients = new Set();
@@ -103,14 +108,18 @@ if (!fs.existsSync(qrDir)) {
 }
 
 // WebSocket connection handler
-wss.on('connection', (ws) => {
+wss.on('connection', async (ws) => {
     console.log('New WS client connected');
     clients.add(ws);
 
     // Send current queue to newly connected client
-    db.getTodayQueue().then(queue => {
-        try { ws.send(JSON.stringify({ type: 'INITIAL_QUEUE', data: queue })); } catch (e) { }
-    }).catch(() => { });
+    try {
+        await dbPromise; // Ensure database is ready
+        const queue = await db.getTodayQueue();
+        ws.send(JSON.stringify({ type: 'INITIAL_QUEUE', data: queue }));
+    } catch (e) {
+        console.error('Error sending initial queue:', e);
+    }
 
     ws.on('close', () => {
         clients.delete(ws);
@@ -571,31 +580,33 @@ app.get('/api/network-info', (req, res) => {
 
 // Start server
 const PORT = process.env.PORT || 3000;
-server.listen(PORT, '0.0.0.0', () => {
-    console.log('\n╔═══════════════════════════════════════════════════════╗');
-    console.log('║   Hospital Queue Management System - SERVER RUNNING   ║');
-    console.log('╚═══════════════════════════════════════════════════════╝\n');
-    console.log(`🏥 Server running on port ${PORT}`);
-    console.log(`\n📱 Access from devices on same Wi-Fi network:`);
+dbPromise.then(() => {
+    server.listen(PORT, '0.0.0.0', () => {
+        console.log('\n╔═══════════════════════════════════════════════════════╗');
+        console.log('║   Hospital Queue Management System - SERVER RUNNING   ║');
+        console.log('╚═══════════════════════════════════════════════════════╝\n');
+        console.log(`🏥 Server running on port ${PORT}`);
+        console.log(`\n📱 Access from devices on same Wi-Fi network:`);
 
-    // Display all network addresses
-    const os = require('os');
-    const interfaces = os.networkInterfaces();
+        // Display all network addresses
+        const os = require('os');
+        const interfaces = os.networkInterfaces();
 
-    for (const name of Object.keys(interfaces)) {
-        for (const iface of interfaces[name]) {
-            if (iface.family === 'IPv4' && !iface.internal) {
-                console.log(`\n   Network: ${name}`);
-                console.log(`   Patient Registration: http://${iface.address}:${PORT}/patient.html`);
-                console.log(`   Doctor Dashboard: http://${iface.address}:${PORT}/doctor.html`);
+        for (const name of Object.keys(interfaces)) {
+            for (const iface of interfaces[name]) {
+                if (iface.family === 'IPv4' && !iface.internal) {
+                    console.log(`\n   Network: ${name}`);
+                    console.log(`   Patient Registration: http://${iface.address}:${PORT}/patient.html`);
+                    console.log(`   Doctor Dashboard: http://${iface.address}:${PORT}/doctor.html`);
+                }
             }
         }
-    }
 
-    console.log('\n   Local: http://localhost:' + PORT + '/patient.html');
-    console.log('\n✅ Database initialized successfully');
-    console.log('✅ WebSocket server ready for real-time updates');
-    console.log('\n⏹️  Press Ctrl+C to stop the server\n');
+        console.log('\n   Local: http://localhost:' + PORT + '/patient.html');
+        console.log('\n✅ Database initialized successfully');
+        console.log('✅ WebSocket server ready for real-time updates');
+        console.log('\n⏹️  Press Ctrl+C to stop the server\n');
+    });
 });
 
 // Graceful shutdown
